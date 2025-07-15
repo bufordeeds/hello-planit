@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 .env
+.env.*
 .svelte-kit
 yarn.lock
 .vercel

@@ -15,17 +15,18 @@ import {
 	PUBLIC_FIREBASE_MEASUREMENT_ID,
 	PUBLIC_ENABLE_ANALYTICS
 } from '$env/static/public';
+import { debugFirebaseConfig } from '$lib/utils/debug.js';
 
-// Firebase configuration
+// Firebase configuration - sanitize environment variables
 const firebaseConfig = {
-	apiKey: PUBLIC_FIREBASE_API_KEY,
-	authDomain: PUBLIC_FIREBASE_AUTH_DOMAIN,
-	databaseURL: PUBLIC_FIREBASE_DATABASE_URL,
-	projectId: PUBLIC_FIREBASE_PROJECT_ID,
-	storageBucket: PUBLIC_FIREBASE_STORAGE_BUCKET,
-	messagingSenderId: PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-	appId: PUBLIC_FIREBASE_APP_ID,
-	measurementId: PUBLIC_FIREBASE_MEASUREMENT_ID
+	apiKey: PUBLIC_FIREBASE_API_KEY?.trim(),
+	authDomain: PUBLIC_FIREBASE_AUTH_DOMAIN?.trim(),
+	databaseURL: PUBLIC_FIREBASE_DATABASE_URL?.trim(),
+	projectId: PUBLIC_FIREBASE_PROJECT_ID?.trim(),
+	storageBucket: PUBLIC_FIREBASE_STORAGE_BUCKET?.trim(),
+	messagingSenderId: PUBLIC_FIREBASE_MESSAGING_SENDER_ID?.trim(),
+	appId: PUBLIC_FIREBASE_APP_ID?.trim(),
+	measurementId: PUBLIC_FIREBASE_MEASUREMENT_ID?.trim()
 };
 
 // Validate configuration
@@ -40,11 +41,23 @@ function validateConfig() {
 		'appId'
 	];
 	
+	// Check for missing keys
 	const missingKeys = requiredKeys.filter(key => !firebaseConfig[key]);
 	
 	if (missingKeys.length > 0) {
 		console.error('Missing required Firebase configuration:', missingKeys);
 		throw new Error('Invalid Firebase configuration');
+	}
+	
+	// Check for malformed URLs or values with newlines
+	const malformedKeys = requiredKeys.filter(key => {
+		const value = firebaseConfig[key];
+		return value && (value.includes('\n') || value.includes('\r') || value.includes('%0A'));
+	});
+	
+	if (malformedKeys.length > 0) {
+		console.error('Malformed Firebase configuration values:', malformedKeys);
+		throw new Error('Firebase configuration contains invalid characters');
 	}
 	
 	return true;
@@ -57,6 +70,11 @@ let database;
 let storage;
 
 try {
+	// Debug configuration in development or if there are issues
+	if (!browser || window.location.hostname === 'localhost') {
+		debugFirebaseConfig();
+	}
+	
 	validateConfig();
 	
 	// Check if Firebase is already initialized
