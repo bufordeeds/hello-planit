@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Planit - Collaborative Event Planning</title>
+		<meta name="description" content="Plan meals, track expenses, and coordinate events with friends and family in real-time." />
+
+		<!-- Lucide Icons -->
+		<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+
+		<script>
+			// Initialize Lucide icons when available
+			if (typeof lucide !== 'undefined') {
+				document.addEventListener('DOMContentLoaded', () => {
+					lucide.createIcons();
+				});
+			}
+		</script>
+	</body>
+</html>

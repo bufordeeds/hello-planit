@@ -1,0 +1,60 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        "profile": {
+          ".validate": "newData.hasChildren(['name', 'email'])"
+        },
+        "events": {
+          "$eventId": {
+            ".validate": "newData.hasChildren(['role', 'joinedAt'])"
+          }
+        }
+      }
+    },
+    "events": {
+      "$eventId": {
+        ".read": "auth != null && (root.child('events').child($eventId).child('members').child(auth.uid).exists() || root.child('events').child($eventId).child('settings').child('privacy').val() === 'public')",
+        ".write": "auth != null && root.child('events').child($eventId).child('members').child(auth.uid).child('role').val() in ['owner', 'admin', 'editor']",
+        
+        "metadata": {
+          ".validate": "newData.hasChildren(['name', 'createdBy', 'createdAt']) && newData.child('createdBy').val() === auth.uid"
+        },
+        
+        "members": {
+          "$memberId": {
+            ".write": "auth != null && (auth.uid === $memberId || root.child('events').child($eventId).child('members').child(auth.uid).child('role').val() in ['owner', 'admin'])",
+            ".validate": "newData.hasChildren(['name', 'role', 'joinedAt'])"
+          }
+        },
+        
+        "meals": {
+          "$mealId": {
+            ".write": "auth != null && root.child('events').child($eventId).child('members').child(auth.uid).exists()",
+            ".validate": "newData.hasChildren(['name', 'addedBy', 'timestamp']) && newData.child('addedBy').val() === auth.uid"
+          }
+        },
+        
+        "expenses": {
+          "$expenseId": {
+            ".write": "auth != null && root.child('events').child($eventId).child('members').child(auth.uid).exists()",
+            ".validate": "newData.hasChildren(['name', 'amount', 'paidBy', 'timestamp']) && newData.child('amount').isNumber() && newData.child('amount').val() > 0"
+          }
+        },
+        
+        "itinerary": {
+          ".write": "auth != null && root.child('events').child($eventId).child('members').child(auth.uid).child('role').val() in ['owner', 'admin', 'editor']"
+        },
+        
+        "settings": {
+          ".write": "auth != null && root.child('events').child($eventId).child('members').child(auth.uid).child('role').val() in ['owner', 'admin']",
+          "privacy": {
+            ".validate": "newData.val() in ['public', 'private', 'invite-only']"
+          }
+        }
+      }
+    }
+  }
+}
