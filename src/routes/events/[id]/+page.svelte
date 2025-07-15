@@ -30,14 +30,14 @@
 		goto('/?message=sign-in-required');
 	}
 
+	// Reactively load event when user authentication changes
+	$: if ($user && eventId && !$authLoading) {
+		loadEvent();
+	}
+
 	onMount(async () => {
 		if (typeof lucide !== 'undefined') {
 			lucide.createIcons();
-		}
-
-		// Only load event for authenticated users
-		if ($user && eventId) {
-			await loadEvent();
 		}
 	});
 
@@ -151,10 +151,10 @@
 </svelte:head>
 
 <div class="event-page">
-	{#if loading}
+	{#if loading || $authLoading}
 		<div class="loading-state">
 			<div class="loading-spinner"></div>
-			<p>Loading event...</p>
+			<p>{$authLoading ? 'Checking authentication...' : 'Loading event...'}</p>
 		</div>
 	{:else if error}
 		<div class="error-state">
