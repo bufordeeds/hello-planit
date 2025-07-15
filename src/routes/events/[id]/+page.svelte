@@ -2,7 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { user, isAuthenticated } from '$lib/stores/auth.js';
+	import { user, isAuthenticated, loading as authLoading } from '$lib/stores/auth.js';
 	import { eventService, currentEvent, eventsError } from '$lib/stores/events.js';
 	import { formatDate } from '$lib/utils/formatters.js';
 	import EventEditModal from '$lib/components/events/EventEditModal.svelte';
@@ -23,7 +23,7 @@
 	$: eventId = $page.params.id;
 
 	// Redirect unauthenticated users to sign up/login with return URL
-	$: if (typeof window !== 'undefined' && !$isAuthenticated && !$loading) {
+	$: if (typeof window !== 'undefined' && !$isAuthenticated && !$authLoading) {
 		// Store the current URL so we can redirect back after authentication
 		const currentUrl = window.location.pathname;
 		sessionStorage.setItem('redirectAfterAuth', currentUrl);
