@@ -4,7 +4,11 @@
 	import { user, isAuthenticated, loading } from '$lib/stores/auth.js';
 	import LoginModal from '$lib/components/auth/LoginModal.svelte';
 	import UserMenu from '$lib/components/auth/UserMenu.svelte';
+	import { injectAnalytics } from '@vercel/analytics/sveltekit';
 	import '$lib/styles/global.css';
+
+	// Inject Vercel Analytics
+	injectAnalytics();
 
 	let showLoginModal = false;
 
