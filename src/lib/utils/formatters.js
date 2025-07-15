@@ -165,9 +165,22 @@ export const formatEventStatus = (event) => {
 	if (!event || !event.metadata) return 'Unknown';
 	
 	const now = new Date();
-	const eventDate = new Date(event.metadata.dates);
+	let eventDate;
 	
-	if (isNaN(eventDate.getTime())) return 'Scheduled';
+	// Handle date range format "July 24, 2025 - July 26, 2025"
+	if (event.metadata.dates) {
+		const dateString = event.metadata.dates;
+		
+		// If it's a date range, use the start date
+		if (dateString.includes(' - ')) {
+			const startDate = dateString.split(' - ')[0].trim();
+			eventDate = new Date(startDate);
+		} else {
+			eventDate = new Date(dateString);
+		}
+	}
+	
+	if (!eventDate || isNaN(eventDate.getTime())) return 'Scheduled';
 	
 	if (eventDate > now) {
 		const daysUntil = Math.ceil((eventDate - now) / (1000 * 60 * 60 * 24));
