@@ -22,9 +22,12 @@
 	// Get event ID from URL params
 	$: eventId = $page.params.id;
 
-	// Redirect to home if not authenticated (browser only)
+	// Redirect unauthenticated users to sign up/login with return URL
 	$: if (typeof window !== 'undefined' && !$isAuthenticated && !loading) {
-		goto('/');
+		// Store the current URL so we can redirect back after authentication
+		const currentUrl = window.location.pathname;
+		sessionStorage.setItem('redirectAfterAuth', currentUrl);
+		goto('/?message=sign-in-required');
 	}
 
 	onMount(async () => {
@@ -32,6 +35,7 @@
 			lucide.createIcons();
 		}
 
+		// Only load event for authenticated users
 		if ($user && eventId) {
 			await loadEvent();
 		}
@@ -394,6 +398,7 @@
 		padding: 0;
 		min-height: calc(100vh - 80px);
 	}
+
 
 	.loading-state,
 	.error-state {

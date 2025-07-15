@@ -45,6 +45,13 @@ if (browser) {
 			// Load user profile
 			const profile = await getUserProfile(firebaseUser.uid);
 			userProfile.set(profile);
+			
+			// Check if user should be redirected after authentication
+			const redirectUrl = sessionStorage.getItem('redirectAfterAuth');
+			if (redirectUrl) {
+				sessionStorage.removeItem('redirectAfterAuth');
+				window.location.href = redirectUrl;
+			}
 		} else {
 			user.set(null);
 			userProfile.set(null);

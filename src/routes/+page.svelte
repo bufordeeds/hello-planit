@@ -1,9 +1,18 @@
 <script>
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import { isAuthenticated } from '$lib/stores/auth.js';
 	import { goto } from '$app/navigation';
 	import LoginModal from '$lib/components/auth/LoginModal.svelte';
 	
 	let showLoginModal = false;
+	let showEventMessage = false;
+	
+	// Check for sign-in required message
+	$: if ($page.url.searchParams.get('message') === 'sign-in-required') {
+		showEventMessage = true;
+		showLoginModal = true;
+	}
 	
 	function handleGetStarted() {
 		if ($isAuthenticated) {
@@ -15,7 +24,11 @@
 	
 	function handleLoginSuccess() {
 		showLoginModal = false;
-		goto('/dashboard');
+		// If there's a redirect URL, the auth store will handle it
+		// Otherwise, go to dashboard
+		if (!sessionStorage.getItem('redirectAfterAuth')) {
+			goto('/dashboard');
+		}
 	}
 	
 	const features = [
@@ -58,6 +71,21 @@
 </svelte:head>
 
 <div class="home">
+	<!-- Event Access Message -->
+	{#if showEventMessage}
+		<div class="event-access-message">
+			<div class="message-content">
+				<div class="message-icon">
+					<i data-lucide="lock"></i>
+				</div>
+				<div class="message-text">
+					<h3>Sign in required</h3>
+					<p>You need to create an account or sign in to view this event. It's quick and free!</p>
+				</div>
+			</div>
+		</div>
+	{/if}
+	
 	<!-- Hero Section -->
 	<section class="hero">
 		<div class="hero-content">
@@ -151,6 +179,53 @@
 <style>
 	.home {
 		width: 100%;
+	}
+
+	/* Event Access Message */
+	.event-access-message {
+		background: #dbeafe;
+		border: 1px solid #3b82f6;
+		border-radius: 8px;
+		padding: 1rem;
+		margin-bottom: 2rem;
+	}
+
+	.message-content {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		max-width: 600px;
+		margin: 0 auto;
+	}
+
+	.message-icon {
+		width: 40px;
+		height: 40px;
+		background: #3b82f6;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		flex-shrink: 0;
+	}
+
+	.message-icon i {
+		width: 20px;
+		height: 20px;
+	}
+
+	.message-text h3 {
+		color: #1e40af;
+		margin: 0 0 0.25rem 0;
+		font-size: 1.125rem;
+		font-weight: 600;
+	}
+
+	.message-text p {
+		color: #1e40af;
+		margin: 0;
+		font-size: 0.875rem;
 	}
 
 	/* Hero Section */
