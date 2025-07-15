@@ -23,7 +23,7 @@
 	$: eventId = $page.params.id;
 
 	// Redirect unauthenticated users to sign up/login with return URL
-	$: if (typeof window !== 'undefined' && !$isAuthenticated && !loading) {
+	$: if (typeof window !== 'undefined' && !$isAuthenticated && !$loading) {
 		// Store the current URL so we can redirect back after authentication
 		const currentUrl = window.location.pathname;
 		sessionStorage.setItem('redirectAfterAuth', currentUrl);
