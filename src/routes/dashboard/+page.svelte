@@ -9,8 +9,8 @@
 	let showCreateEventModal = false;
 	let userEventsList = [];
 	
-	// Redirect to home if not authenticated
-	$: if (!$isAuthenticated && !$eventsLoading) {
+	// Redirect to home if not authenticated (browser only)
+	$: if (typeof window !== 'undefined' && !$isAuthenticated && !$eventsLoading) {
 		goto('/');
 	}
 	

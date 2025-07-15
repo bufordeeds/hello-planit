@@ -5,29 +5,29 @@
 	import LoginModal from '$lib/components/auth/LoginModal.svelte';
 	import UserMenu from '$lib/components/auth/UserMenu.svelte';
 	import '$lib/styles/global.css';
-	
+
 	let showLoginModal = false;
-	
+
 	// Initialize Lucide icons when component mounts
 	onMount(() => {
 		if (typeof lucide !== 'undefined') {
 			lucide.createIcons();
 		}
 	});
-	
+
 	function handleShowLogin() {
 		showLoginModal = true;
 	}
-	
+
 	function handleLoginSuccess() {
 		showLoginModal = false;
 	}
-	
+
 	function handleProfile() {
 		// Navigate to profile - will implement later
 		console.log('Navigate to profile');
 	}
-	
+
 	function handleDashboard() {
 		// Navigate to dashboard
 		window.location.href = '/dashboard';
@@ -41,7 +41,7 @@
 			<div class="loading-spinner"></div>
 		</div>
 	{/if}
-	
+
 	<!-- Header -->
 	<header class="header">
 		<div class="header-content">
@@ -51,10 +51,10 @@
 					<span class="brand-tagline">Collaborative Event Planning</span>
 				</a>
 			</div>
-			
+
 			<div class="header-actions">
 				{#if $isAuthenticated}
-					<UserMenu 
+					<UserMenu
 						on:profile={handleProfile}
 						on:dashboard={handleDashboard}
 					/>
@@ -71,16 +71,16 @@
 			</div>
 		</div>
 	</header>
-	
+
 	<!-- Main content -->
 	<main class="main">
 		<slot />
 	</main>
-	
+
 	<!-- Footer -->
 	<footer class="footer">
 		<div class="footer-content">
-			<p>&copy; 2024 Planit. Built for seamless event collaboration.</p>
+			<p>&copy; 2025 Planit. Built for seamless event collaboration.</p>
 			<div class="footer-links">
 				<a href="/privacy">Privacy</a>
 				<a href="/terms">Terms</a>
@@ -88,9 +88,9 @@
 			</div>
 		</div>
 	</footer>
-	
+
 	<!-- Login Modal -->
-	<LoginModal 
+	<LoginModal
 		bind:isOpen={showLoginModal}
 		on:success={handleLoginSuccess}
 	/>

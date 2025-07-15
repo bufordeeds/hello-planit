@@ -50,14 +50,42 @@ function validateConfig() {
 	return true;
 }
 
-// Initialize Firebase
-validateConfig();
-export const app = initializeApp(firebaseConfig);
+// Initialize Firebase only once
+let app;
+let auth;
+let database;
+let storage;
 
-// Initialize services
-export const auth = getAuth(app);
-export const database = getDatabase(app);
-export const storage = getStorage(app);
+try {
+	validateConfig();
+	
+	// Check if Firebase is already initialized
+	if (!app) {
+		console.log('Initializing Firebase with config:', {
+			...firebaseConfig,
+			apiKey: '***' // Hide sensitive data in logs
+		});
+		
+		app = initializeApp(firebaseConfig);
+		auth = getAuth(app);
+		
+		// Initialize database with explicit URL
+		if (firebaseConfig.databaseURL) {
+			database = getDatabase(app, firebaseConfig.databaseURL);
+			console.log('Firebase Database initialized successfully with URL:', firebaseConfig.databaseURL);
+		} else {
+			console.error('Database URL is missing!');
+			throw new Error('Firebase Database URL is required');
+		}
+		
+		storage = getStorage(app);
+	}
+} catch (error) {
+	console.error('Failed to initialize Firebase:', error);
+	throw error;
+}
+
+export { app, auth, database, storage };
 
 // Initialize analytics only in browser and if enabled
 export const analytics = browser && PUBLIC_ENABLE_ANALYTICS === 'true' 

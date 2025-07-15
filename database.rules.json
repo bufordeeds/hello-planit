@@ -1,0 +1,43 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    
+    "events": {
+      "$eventId": {
+        ".read": "auth != null && (data.child('members').child(auth.uid).exists() || data.child('settings/privacy').val() === 'public')",
+        ".write": "auth != null && (!data.exists() || data.child('members').child(auth.uid).child('permissions').hasChild('write'))",
+        
+        "metadata": {
+          ".validate": "newData.hasChildren(['name', 'createdBy', 'createdAt'])"
+        },
+        
+        "members": {
+          "$userId": {
+            ".write": "auth != null && (auth.uid === $userId || data.parent().child(auth.uid).child('permissions').hasChild('invite'))"
+          }
+        }
+      }
+    },
+    
+    "users": {
+      "$userId": {
+        ".read": "auth != null && auth.uid === $userId",
+        ".write": "auth != null && auth.uid === $userId",
+        
+        "events": {
+          "$eventId": {
+            ".validate": "newData.hasChildren(['role', 'joinedAt'])"
+          }
+        }
+      }
+    },
+    
+    "test": {
+      "$userId": {
+        ".read": "auth != null && auth.uid === $userId",
+        ".write": "auth != null && auth.uid === $userId"
+      }
+    }
+  }
+}

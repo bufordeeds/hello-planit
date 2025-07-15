@@ -1,4 +1,5 @@
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get as getStore } from 'svelte/store';
+import { browser } from '$app/environment';
 import { user } from './auth.js';
 import { 
 	ref, 
@@ -34,12 +35,24 @@ export const userEvents = derived(
 export const eventService = {
 	// Create a new event
 	async createEvent(eventData) {
-		const currentUser = get(user);
+		if (!browser) {
+			throw new Error('Event creation is only available in browser');
+		}
+		
+		const currentUser = getStore(user);
 		if (!currentUser) throw new Error('User must be authenticated');
 
 		try {
 			eventsLoading.set(true);
 			eventsError.set(null);
+
+			console.log('Creating event with data:', eventData);
+			console.log('Current user:', currentUser.uid);
+			console.log('Database instance:', database);
+
+			if (!database) {
+				throw new Error('Firebase Database is not initialized');
+			}
 
 			const eventRef = push(ref(database, 'events'));
 			const eventId = eventRef.key;
@@ -59,7 +72,7 @@ export const eventService = {
 					privacy: eventData.privacy || 'private',
 					allowEditing: eventData.allowEditing !== false,
 					requireApproval: eventData.requireApproval || false,
-					features: {
+					features: eventData.features || {
 						meals: true,
 						expenses: true,
 						itinerary: true,
@@ -83,13 +96,19 @@ export const eventService = {
 				expenses: {},
 			};
 
+			console.log('Setting event data in Firebase...');
 			await set(eventRef, event);
+			console.log('Event created successfully with ID:', eventId);
 
 			// Add event to user's event list
+			console.log('Adding event to user event list...');
 			await this.addEventToUser(currentUser.uid, eventId, 'owner');
+			console.log('Event added to user list successfully');
 
 			return { eventId, event };
 		} catch (error) {
+			console.error('Error creating event:', error);
+			console.error('Error details:', error.message, error.code);
 			eventsError.set(error.message);
 			throw error;
 		} finally {
@@ -170,7 +189,7 @@ export const eventService = {
 
 	// Update event metadata
 	async updateEvent(eventId, updates) {
-		const currentUser = get(user);
+		const currentUser = getStore(user);
 		if (!currentUser) throw new Error('User must be authenticated');
 
 		try {
@@ -185,7 +204,7 @@ export const eventService = {
 			});
 
 			// Update current event if it's the one being edited
-			const current = get(currentEvent);
+			const current = getStore(currentEvent);
 			if (current && current.id === eventId) {
 				currentEvent.update(event => ({
 					...event,
@@ -198,9 +217,39 @@ export const eventService = {
 		}
 	},
 
+	// Update event settings
+	async updateEventSettings(eventId, settings) {
+		const currentUser = getStore(user);
+		if (!currentUser) throw new Error('User must be authenticated');
+
+		try {
+			// Check permissions
+			const hasPermission = await this.checkPermission(eventId, currentUser.uid, 'admin');
+			if (!hasPermission) throw new Error('Permission denied');
+
+			const settingsRef = ref(database, `events/${eventId}/settings`);
+			await update(settingsRef, {
+				...settings,
+				updatedAt: serverTimestamp(),
+			});
+
+			// Update current event if it's the one being edited
+			const current = getStore(currentEvent);
+			if (current && current.id === eventId) {
+				currentEvent.update(event => ({
+					...event,
+					settings: { ...event.settings, ...settings }
+				}));
+			}
+		} catch (error) {
+			eventsError.set(error.message);
+			throw error;
+		}
+	},
+
 	// Delete event
 	async deleteEvent(eventId) {
-		const currentUser = get(user);
+		const currentUser = getStore(user);
 		if (!currentUser) throw new Error('User must be authenticated');
 
 		try {
@@ -233,7 +282,7 @@ export const eventService = {
 
 			// Update stores
 			events.update(list => list.filter(e => e.id !== eventId));
-			const current = get(currentEvent);
+			const current = getStore(currentEvent);
 			if (current && current.id === eventId) {
 				currentEvent.set(null);
 			}
@@ -329,7 +378,7 @@ export const eventService = {
 
 	// Invite user to event
 	async inviteUser(eventId, inviteData) {
-		const currentUser = get(user);
+		const currentUser = getStore(user);
 		if (!currentUser) throw new Error('User must be authenticated');
 
 		try {

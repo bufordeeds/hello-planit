@@ -5,18 +5,25 @@
 	import { user, isAuthenticated } from '$lib/stores/auth.js';
 	import { eventService, currentEvent, eventsError } from '$lib/stores/events.js';
 	import { formatDate } from '$lib/utils/formatters.js';
+	import EventEditModal from '$lib/components/events/EventEditModal.svelte';
+	import ShareModal from '$lib/components/events/ShareModal.svelte';
 
 	let eventId = '';
 	let event = null;
 	let loading = true;
 	let error = null;
 	let unsubscribe = null;
+	
+	// Modal states
+	let showEditModal = false;
+	let showShareModal = false;
+	let editLoading = false;
 
 	// Get event ID from URL params
 	$: eventId = $page.params.id;
 
-	// Redirect to home if not authenticated
-	$: if (!$isAuthenticated && !loading) {
+	// Redirect to home if not authenticated (browser only)
+	$: if (typeof window !== 'undefined' && !$isAuthenticated && !loading) {
 		goto('/');
 	}
 
@@ -62,18 +69,59 @@
 	}
 
 	function handleEditEvent() {
-		// TODO: Implement edit functionality
-		console.log('Edit event:', eventId);
+		showEditModal = true;
 	}
 
 	function handleShareEvent() {
-		// TODO: Implement share functionality
-		console.log('Share event:', eventId);
+		showShareModal = true;
 	}
 
-	function handleDeleteEvent() {
-		// TODO: Implement delete functionality
-		console.log('Delete event:', eventId);
+	async function handleDeleteEvent() {
+		if (!confirm(`Are you sure you want to delete "${event?.metadata?.name}"? This action cannot be undone.`)) {
+			return;
+		}
+		
+		try {
+			loading = true;
+			await eventService.deleteEvent(eventId);
+			goto('/dashboard');
+		} catch (err) {
+			error = err.message || 'Failed to delete event';
+		} finally {
+			loading = false;
+		}
+	}
+	
+	async function handleEditSave(eventData) {
+		try {
+			editLoading = true;
+			const { eventId: id, updates, settingsUpdates } = eventData.detail;
+			
+			// Update event metadata
+			await eventService.updateEvent(id, updates);
+			
+			// Update event settings if provided
+			if (settingsUpdates) {
+				await eventService.updateEventSettings(id, settingsUpdates);
+			}
+			
+			showEditModal = false;
+			
+			// Refresh event data
+			await loadEvent();
+		} catch (err) {
+			error = err.message || 'Failed to update event';
+		} finally {
+			editLoading = false;
+		}
+	}
+	
+	function handleEditClose() {
+		showEditModal = false;
+	}
+	
+	function handleShareClose() {
+		showShareModal = false;
 	}
 
 	function getUserRole() {
@@ -322,6 +370,22 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Edit Modal -->
+<EventEditModal 
+	bind:isOpen={showEditModal}
+	{event}
+	loading={editLoading}
+	on:save={handleEditSave}
+	on:close={handleEditClose}
+/>
+
+<!-- Share Modal -->
+<ShareModal 
+	bind:isOpen={showShareModal}
+	{event}
+	on:close={handleShareClose}
+/>
 
 <style>
 	.event-page {

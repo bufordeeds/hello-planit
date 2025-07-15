@@ -17,6 +17,8 @@
 		name: '',
 		description: '',
 		dates: '',
+		startDate: '',
+		endDate: '',
 		location: '',
 		type: 'general',
 		privacy: 'private',
@@ -33,6 +35,8 @@
 			name: '',
 			description: '',
 			dates: '',
+			startDate: '',
+			endDate: '',
 			location: '',
 			type: 'general',
 			privacy: 'private',
@@ -74,6 +78,33 @@
 		eventData = { ...eventData };
 	}
 	
+	// Convert date picker values to dates string
+	function formatDateRange(startDate, endDate) {
+		if (!startDate) return '';
+		
+		const start = new Date(startDate);
+		const end = endDate ? new Date(endDate) : null;
+		
+		const formatDate = (date) => {
+			return date.toLocaleDateString('en-US', { 
+				year: 'numeric', 
+				month: 'long', 
+				day: 'numeric' 
+			});
+		};
+		
+		if (end && start.getTime() !== end.getTime()) {
+			return `${formatDate(start)} - ${formatDate(end)}`;
+		} else {
+			return formatDate(start);
+		}
+	}
+	
+	// Update dates string when date picker values change
+	$: if (eventData.startDate || eventData.endDate) {
+		eventData.dates = formatDateRange(eventData.startDate, eventData.endDate);
+	}
+	
 	function applyTemplateDefaults() {
 		const template = getTemplate(eventData.template);
 		
@@ -91,9 +122,19 @@
 		
 		if (currentStep === 2) {
 			// Validate basic information
-			const validation = validateEvent(eventData);
-			if (!validation.isValid) {
-				error = validation.errors[0];
+			if (!eventData.name || eventData.name.trim().length < 2) {
+				error = 'Event name must be at least 2 characters long';
+				return false;
+			}
+			
+			if (!eventData.startDate) {
+				error = 'Please select a start date for your event';
+				return false;
+			}
+			
+			// Validate that end date is not before start date
+			if (eventData.endDate && eventData.startDate && eventData.endDate < eventData.startDate) {
+				error = 'End date cannot be before start date';
 				return false;
 			}
 		}
@@ -144,6 +185,7 @@
 			handleClose();
 			dispatch('success', result);
 		} catch (err) {
+			console.error('Event creation error:', err);
 			error = err.message || 'Failed to create event';
 		} finally {
 			isLoading = false;
@@ -151,12 +193,14 @@
 	}
 	
 	function focusFirstInput() {
-		setTimeout(() => {
-			const firstInput = document.querySelector(`.wizard-step[data-step="${currentStep}"] input:not([type="hidden"]), .wizard-step[data-step="${currentStep}"] textarea`);
-			if (firstInput) {
-				firstInput.focus();
-			}
-		}, 100);
+		if (typeof window !== 'undefined') {
+			setTimeout(() => {
+				const firstInput = document.querySelector(`.wizard-step[data-step="${currentStep}"] input:not([type="hidden"]), .wizard-step[data-step="${currentStep}"] textarea`);
+				if (firstInput) {
+					firstInput.focus();
+				}
+			}, 100);
+		}
 	}
 	
 	// Focus first input when step changes
@@ -238,14 +282,28 @@
 						
 						<div class="form-group">
 							<label for="eventDates">Event Dates *</label>
-							<input 
-								type="text" 
-								id="eventDates" 
-								bind:value={eventData.dates}
-								placeholder="e.g., March 15-17, 2024"
-								required 
-							/>
-							<small>Enter the dates for your event (flexible format)</small>
+							<div class="date-picker-group">
+								<div class="date-input">
+									<label for="startDate">Start Date</label>
+									<input 
+										type="date" 
+										id="startDate" 
+										bind:value={eventData.startDate}
+										required 
+										min={new Date().toISOString().split('T')[0]}
+									/>
+								</div>
+								<div class="date-input">
+									<label for="endDate">End Date</label>
+									<input 
+										type="date" 
+										id="endDate" 
+										bind:value={eventData.endDate}
+										min={eventData.startDate || new Date().toISOString().split('T')[0]}
+									/>
+								</div>
+							</div>
+							<small>Select start and end dates for your event (leave end date empty for single-day events)</small>
 						</div>
 						
 						<div class="form-group">
@@ -614,6 +672,24 @@
 		font-size: 0.75rem;
 		color: #6b7280;
 	}
+	
+	.date-picker-group {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+	}
+	
+	.date-input {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+	
+	.date-input label {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: #6b7280;
+	}
 
 	/* Radio and Checkbox Groups */
 	.radio-group,
@@ -825,6 +901,10 @@
 		
 		.template-card {
 			padding: 1rem;
+		}
+		
+		.date-picker-group {
+			grid-template-columns: 1fr;
 		}
 		
 		.step-indicator {
