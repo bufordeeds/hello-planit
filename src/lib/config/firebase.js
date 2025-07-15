@@ -89,8 +89,14 @@ try {
 		
 		// Initialize database with explicit URL
 		if (firebaseConfig.databaseURL) {
-			database = getDatabase(app, firebaseConfig.databaseURL);
-			console.log('Firebase Database initialized successfully with URL:', firebaseConfig.databaseURL);
+			try {
+				database = getDatabase(app, firebaseConfig.databaseURL);
+				console.log('Firebase Database initialized successfully with URL:', firebaseConfig.databaseURL);
+			} catch (dbError) {
+				console.error('Failed to initialize database:', dbError);
+				console.error('Database URL:', firebaseConfig.databaseURL);
+				throw dbError;
+			}
 		} else {
 			console.error('Database URL is missing!');
 			throw new Error('Firebase Database URL is required');
