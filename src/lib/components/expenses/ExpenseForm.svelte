@@ -18,6 +18,8 @@
 		paidBy: '',
 		date: '',
 		receipt: null,
+		splitType: 'all',
+		splitBetween: [],
 	};
 	
 	let error = null;
@@ -54,6 +56,8 @@
 				paidBy: editingExpense.paidBy || '',
 				date: editingExpense.date ? editingExpense.date.split('T')[0] : '',
 				receipt: null,
+				splitType: editingExpense.splitType || 'all',
+				splitBetween: Array.isArray(editingExpense.splitBetween) ? editingExpense.splitBetween : [],
 			};
 		} else {
 			const today = new Date().toISOString().split('T')[0];
@@ -67,6 +71,8 @@
 				paidBy: memberIds.length > 0 ? memberIds[0] : '',
 				date: today,
 				receipt: null,
+				splitType: 'all',
+				splitBetween: [],
 			};
 		}
 		error = null;
@@ -182,6 +188,8 @@
 			paidBy: formData.paidBy,
 			date: formData.date,
 			receipt: formData.receipt,
+			splitType: formData.splitType,
+			splitBetween: formData.splitBetween,
 		};
 		
 		dispatch('submit', sanitizedData);
@@ -195,6 +203,20 @@
 	function getMemberName(memberId) {
 		if (!memberId || !members[memberId]) return 'Unknown';
 		return members[memberId].name || members[memberId].email || 'Unknown';
+	}
+	
+	function handleSplitTypeChange() {
+		if (formData.splitType === 'all') {
+			formData.splitBetween = [];
+		}
+	}
+	
+	function handleMemberToggle(memberId) {
+		if (formData.splitBetween.includes(memberId)) {
+			formData.splitBetween = formData.splitBetween.filter(id => id !== memberId);
+		} else {
+			formData.splitBetween = [...formData.splitBetween, memberId];
+		}
 	}
 </script>
 
@@ -310,6 +332,56 @@
 								required
 							/>
 						</div>
+					</div>
+				</div>
+				
+				<!-- Split Between -->
+				<div class="form-section">
+					<h3>Split Between</h3>
+					
+					<div class="form-group">
+						<div class="split-options">
+							<label class="radio-option">
+								<input 
+									type="radio" 
+									bind:group={formData.splitType} 
+									value="all"
+									on:change={handleSplitTypeChange}
+								/>
+								<span>All event guests</span>
+							</label>
+							<label class="radio-option">
+								<input 
+									type="radio" 
+									bind:group={formData.splitType} 
+									value="select"
+									on:change={handleSplitTypeChange}
+								/>
+								<span>Select specific guests</span>
+							</label>
+						</div>
+						
+						{#if formData.splitType === 'select'}
+							<div class="member-checkboxes">
+								{#each Object.entries(members) as [memberId, member]}
+									<label class="member-checkbox">
+										<input 
+											type="checkbox" 
+											checked={formData.splitBetween.includes(memberId)}
+											on:change={() => handleMemberToggle(memberId)}
+										/>
+										<span>{getMemberName(memberId)}</span>
+									</label>
+								{/each}
+								
+								{#if formData.splitType === 'select' && formData.splitBetween.length === 0}
+									<div class="split-warning">
+										<i data-lucide="alert-circle"></i>
+										<span>Select at least one guest to split with</span>
+									</div>
+								{/if}
+							</div>
+						{/if}
 					</div>
 				</div>
 				
@@ -779,5 +851,96 @@
 		.btn {
 			width: 100%;
 		}
+	}
+	
+	/* Split Between Styles */
+	.split-options {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-bottom: 1rem;
+	}
+	
+	.radio-option {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		border: 2px solid #e5e7eb;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+	
+	.radio-option:hover {
+		border-color: #d1d5db;
+		background: #f9fafb;
+	}
+	
+	.radio-option input[type="radio"] {
+		margin: 0;
+	}
+	
+	.radio-option:has(input[type="radio"]:checked) {
+		border-color: #3b82f6;
+		background: #eff6ff;
+	}
+	
+	.radio-option span {
+		font-weight: 500;
+		color: #374151;
+	}
+	
+	.member-checkboxes {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 0.5rem;
+		margin-top: 1rem;
+		padding: 1rem;
+		background: #f9fafb;
+		border-radius: 8px;
+		border: 1px solid #e5e7eb;
+	}
+	
+	.member-checkbox {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem;
+		cursor: pointer;
+		border-radius: 4px;
+		transition: background 0.2s ease;
+	}
+	
+	.member-checkbox:hover {
+		background: #f3f4f6;
+	}
+	
+	.member-checkbox input[type="checkbox"] {
+		margin: 0;
+	}
+	
+	.member-checkbox span {
+		font-size: 0.875rem;
+		color: #374151;
+	}
+	
+	.split-warning {
+		grid-column: 1 / -1;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		background: #fef2f2;
+		border: 1px solid #fecaca;
+		border-radius: 6px;
+		color: #dc2626;
+		font-size: 0.875rem;
+		margin-top: 0.5rem;
+	}
+	
+	.split-warning i {
+		width: 16px;
+		height: 16px;
 	}
 </style>
