@@ -385,6 +385,7 @@
 						{eventId}
 						eventDays={getDaysFromEvent(event)}
 						mealSlots={getMealSlotsFromEvent(event)}
+						members={event?.members || {}}
 						canEdit={canUserEdit()}
 						on:mealsUpdated={() => {}}
 					/>

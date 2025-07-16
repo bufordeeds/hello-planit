@@ -13,6 +13,7 @@
 	export let meals = {};
 	export let mealSlots = ['breakfast', 'lunch', 'dinner'];
 	export let eventDays = ['day-1', 'day-2'];
+	export let members = {};
 	export let canEdit = false;
 	
 	let showAddMealModal = false;
@@ -29,10 +30,25 @@
 	$: totalCost = calculateTotalCost(meals);
 	$: mealCount = Object.keys(meals).length;
 	
-	onMount(() => {
-		if (typeof lucide !== 'undefined') {
-			lucide.createIcons();
+	// Reinitialize Lucide icons when meals change
+	$: if (meals && Object.keys(meals).length > 0) {
+		setTimeout(() => {
+			initializeLucideIcons();
+		}, 100);
+	}
+	
+	function initializeLucideIcons() {
+		if (typeof window !== 'undefined' && typeof lucide !== 'undefined') {
+			try {
+				lucide.createIcons();
+			} catch (error) {
+				console.warn('Failed to initialize Lucide icons:', error);
+			}
 		}
+	}
+	
+	onMount(() => {
+		initializeLucideIcons();
 		
 		// Initialize meal service
 		if (eventId) {
@@ -41,6 +57,10 @@
 			// Subscribe to real-time meal updates
 			unsubscribeMeals = mealService.subscribeMeals((updatedMeals) => {
 				meals = updatedMeals;
+				// Reinitialize icons after meal updates
+				setTimeout(() => {
+					initializeLucideIcons();
+				}, 50);
 			});
 		}
 	});
@@ -213,6 +233,14 @@
 		return slotLabels[slot] || slot.charAt(0).toUpperCase() + slot.slice(1);
 	}
 	
+	function getAssignedMemberName(assignedTo) {
+		if (!assignedTo || !members[assignedTo]) {
+			return null;
+		}
+		const member = members[assignedTo];
+		return member.name || member.email;
+	}
+	
 	function getSlotIcon(slot) {
 		const slotIcons = {
 			'breakfast': 'coffee',
@@ -278,21 +306,22 @@
 					<div class="meal-cell">
 						{#if mealGrid[day] && mealGrid[day][slot]}
 							{#each mealGrid[day][slot] as meal}
-								<div class="meal-card">
+								<div 
+									class="meal-card" 
+									class:clickable={canEdit}
+									on:click={() => canEdit && handleEditMeal(meal)}
+									on:keydown={(e) => canEdit && (e.key === 'Enter' || e.key === ' ') && handleEditMeal(meal)}
+									role={canEdit ? 'button' : undefined}
+									tabindex={canEdit ? 0 : undefined}
+									title={canEdit ? 'Click to edit meal' : undefined}
+								>
 									<div class="meal-header">
 										<h4 class="meal-name">{meal.name}</h4>
 										{#if canEdit}
 											<div class="meal-actions">
 												<button 
-													class="btn-icon" 
-													on:click={() => handleEditMeal(meal)}
-													title="Edit meal"
-												>
-													<i data-lucide="edit-3"></i>
-												</button>
-												<button 
 													class="btn-icon btn-danger" 
-													on:click={() => deleteMeal(meal.id)}
+													on:click|stopPropagation={() => deleteMeal(meal.id)}
 													title="Delete meal"
 												>
 													<i data-lucide="trash-2"></i>
@@ -335,10 +364,10 @@
 										{/if}
 									</div>
 									
-									{#if meal.assignedTo}
+									{#if meal.assignedTo && getAssignedMemberName(meal.assignedTo)}
 										<div class="meal-assignment">
 											<i data-lucide="user-check"></i>
-											<span>Assigned to {meal.assignedTo}</span>
+											<span>Assigned to {getAssignedMemberName(meal.assignedTo)}</span>
 										</div>
 									{/if}
 								</div>
@@ -386,6 +415,7 @@
 	{selectedSlot}
 	{eventDays}
 	{mealSlots}
+	{members}
 	{loading}
 	on:submit={handleMealSubmit}
 	on:close={handleCloseModal}
@@ -532,6 +562,23 @@
 		border-color: #cbd5e1;
 	}
 	
+	.meal-card.clickable {
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+	
+	.meal-card.clickable:hover {
+		background: #f1f5f9;
+		border-color: #3b82f6;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+		transform: translateY(-1px);
+	}
+	
+	.meal-card.clickable:active {
+		transform: translateY(0);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+	
 	.meal-header {
 		display: flex;
 		justify-content: space-between;
@@ -628,9 +675,9 @@
 	}
 	
 	.btn-icon {
-		background: none;
-		border: none;
-		padding: 0.25rem;
+		background: #f3f4f6;
+		border: 1px solid #d1d5db;
+		padding: 0.375rem;
 		border-radius: 4px;
 		color: #6b7280;
 		cursor: pointer;
@@ -638,21 +685,49 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		min-width: 28px;
+		min-height: 28px;
 	}
 	
 	.btn-icon:hover {
 		background: #e5e7eb;
 		color: #374151;
+		border-color: #9ca3af;
+	}
+	
+	.btn-icon.btn-danger {
+		background: #fef2f2;
+		border-color: #fecaca;
+		color: #dc2626;
 	}
 	
 	.btn-icon.btn-danger:hover {
 		background: #fee2e2;
 		color: #dc2626;
+		border-color: #f87171;
 	}
 	
 	.btn-icon i {
 		width: 14px;
 		height: 14px;
+	}
+	
+	.delete-icon {
+		font-size: 16px;
+		font-weight: bold;
+		line-height: 1;
+	}
+	
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 	
 	.empty-state {

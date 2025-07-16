@@ -10,6 +10,7 @@
 	export let selectedSlot = 'breakfast';
 	export let eventDays = ['day-1', 'day-2'];
 	export let mealSlots = ['breakfast', 'lunch', 'dinner'];
+	export let members = {};
 	export let loading = false;
 	
 	let formData = {
@@ -312,13 +313,15 @@
 					
 					<div class="form-group">
 						<label for="mealAssignee">Assigned To</label>
-						<input 
-							type="text" 
+						<select 
 							id="mealAssignee" 
 							bind:value={formData.assignedTo}
-							placeholder="Who is responsible for this meal?"
-							maxlength="100"
-						/>
+						>
+							<option value="">No one assigned</option>
+							{#each Object.entries(members) as [memberId, member]}
+								<option value={memberId}>{member.name || member.email}</option>
+							{/each}
+						</select>
 					</div>
 				</div>
 				
