@@ -1,9 +1,10 @@
 <script>
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 	import { user } from '$lib/stores/auth.js';
 	import { currentEvent, eventService } from '$lib/stores/events.js';
 	import { sanitizeInput, validateEvent } from '$lib/utils/validation.js';
 	import { formatCurrency } from '$lib/utils/formatters.js';
+	import { createMealService } from '$lib/services/mealService.js';
 	import MealForm from './MealForm.svelte';
 	
 	const dispatch = createEventDispatcher();
@@ -20,6 +21,8 @@
 	let selectedSlot = 'breakfast';
 	let error = null;
 	let loading = false;
+	let mealService = null;
+	let unsubscribeMeals = null;
 	
 	// Reactive meal grid
 	$: mealGrid = createMealGrid(meals, eventDays, mealSlots);
@@ -29,6 +32,26 @@
 	onMount(() => {
 		if (typeof lucide !== 'undefined') {
 			lucide.createIcons();
+		}
+		
+		// Initialize meal service
+		if (eventId) {
+			mealService = createMealService(eventId);
+			
+			// Subscribe to real-time meal updates
+			unsubscribeMeals = mealService.subscribeMeals((updatedMeals) => {
+				meals = updatedMeals;
+			});
+		}
+	});
+	
+	onDestroy(() => {
+		// Clean up subscriptions
+		if (unsubscribeMeals) {
+			unsubscribeMeals();
+		}
+		if (mealService) {
+			mealService.cleanup();
 		}
 	});
 	
@@ -48,6 +71,9 @@
 	}
 	
 	function calculateTotalCost(mealsData) {
+		if (mealService) {
+			return mealService.calculateTotalCost(mealsData);
+		}
 		return Object.values(mealsData).reduce((total, meal) => {
 			return total + (meal.cost || 0);
 		}, 0);
@@ -92,49 +118,58 @@
 	}
 	
 	async function createMeal(mealData) {
-		// TODO: Implement Firebase meal creation
-		console.log('Creating meal:', mealData);
+		if (!mealService || !$user) {
+			throw new Error('Meal service not initialized or user not authenticated');
+		}
 		
-		// Mock implementation for now
-		const mealId = `meal_${Date.now()}`;
-		meals[mealId] = {
-			id: mealId,
-			...mealData,
-			createdBy: $user.uid,
-			createdAt: new Date().toISOString(),
-		};
-		meals = { ...meals };
+		try {
+			const newMeal = await mealService.createMeal({
+				...mealData,
+				day: selectedDay,
+				slot: selectedSlot
+			}, $user.uid);
+			
+			console.log('Meal created successfully:', newMeal);
+		} catch (error) {
+			console.error('Error creating meal:', error);
+			throw error;
+		}
 	}
 	
 	async function updateMeal(mealId, mealData) {
-		// TODO: Implement Firebase meal update
-		console.log('Updating meal:', mealId, mealData);
+		if (!mealService || !$user) {
+			throw new Error('Meal service not initialized or user not authenticated');
+		}
 		
-		// Mock implementation for now
-		if (meals[mealId]) {
-			meals[mealId] = {
-				...meals[mealId],
+		try {
+			const updatedMeal = await mealService.updateMeal(mealId, {
 				...mealData,
-				updatedAt: new Date().toISOString(),
-			};
-			meals = { ...meals };
+				day: selectedDay,
+				slot: selectedSlot
+			}, $user.uid);
+			
+			console.log('Meal updated successfully:', updatedMeal);
+		} catch (error) {
+			console.error('Error updating meal:', error);
+			throw error;
 		}
 	}
 	
 	async function deleteMeal(mealId) {
 		if (!confirm('Are you sure you want to delete this meal?')) return;
 		
+		if (!mealService || !$user) {
+			error = 'Meal service not initialized or user not authenticated';
+			return;
+		}
+		
 		try {
 			loading = true;
 			error = null;
 			
-			// TODO: Implement Firebase meal deletion
-			console.log('Deleting meal:', mealId);
+			await mealService.deleteMeal(mealId, $user.uid);
 			
-			// Mock implementation for now
-			delete meals[mealId];
-			meals = { ...meals };
-			
+			console.log('Meal deleted successfully');
 			dispatch('mealsUpdated');
 		} catch (err) {
 			error = err.message || 'Failed to delete meal';

@@ -1,9 +1,10 @@
 <script>
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 	import { user } from '$lib/stores/auth.js';
 	import { currentEvent, eventService } from '$lib/stores/events.js';
 	import { sanitizeInput } from '$lib/utils/validation.js';
 	import { formatCurrency } from '$lib/utils/formatters.js';
+	import { createExpenseService } from '$lib/services/expenseService.js';
 	import ExpenseForm from './ExpenseForm.svelte';
 	import ExpenseSummary from './ExpenseSummary.svelte';
 	
@@ -20,6 +21,8 @@
 	let selectedMember = 'all';
 	let error = null;
 	let loading = false;
+	let expenseService = null;
+	let unsubscribeExpenses = null;
 	
 	// Expense categories
 	const categories = [
@@ -38,10 +41,31 @@
 	$: totalAmount = calculateTotal(expensesList);
 	$: categoryTotals = calculateCategoryTotals(expensesList);
 	$: memberBalances = calculateMemberBalances(expensesList, members);
+	$: settlements = calculateSettlements(memberBalances, members);
 	
 	onMount(() => {
 		if (typeof lucide !== 'undefined') {
 			lucide.createIcons();
+		}
+		
+		// Initialize expense service
+		if (eventId) {
+			expenseService = createExpenseService(eventId);
+			
+			// Subscribe to real-time expense updates
+			unsubscribeExpenses = expenseService.subscribeExpenses((updatedExpenses) => {
+				expenses = updatedExpenses;
+			});
+		}
+	});
+	
+	onDestroy(() => {
+		// Clean up subscriptions
+		if (unsubscribeExpenses) {
+			unsubscribeExpenses();
+		}
+		if (expenseService) {
+			expenseService.cleanup();
 		}
 	});
 	
@@ -68,6 +92,23 @@
 	}
 	
 	function calculateMemberBalances(expensesList, membersData) {
+		if (expenseService) {
+			// Use the service method which handles proper split calculations
+			const rawBalances = expenseService.calculateBalances(expenses, membersData);
+			
+			// Format balances for the UI
+			const formattedBalances = {};
+			Object.entries(rawBalances).forEach(([memberId, balance]) => {
+				formattedBalances[memberId] = {
+					name: membersData[memberId]?.name || membersData[memberId]?.email || 'Unknown',
+					balance: balance
+				};
+			});
+			
+			return formattedBalances;
+		}
+		
+		// Fallback calculation
 		const balances = {};
 		const memberIds = Object.keys(membersData);
 		
@@ -83,8 +124,8 @@
 		
 		// Calculate what each member paid
 		expensesList.forEach(expense => {
-			if (expense.paidBy && balances[expense.paidBy]) {
-				balances[expense.paidBy].paid += expense.amount || 0;
+			if (expense.paidByUserId && balances[expense.paidByUserId]) {
+				balances[expense.paidByUserId].paid += expense.amount || 0;
 			}
 		});
 		
@@ -98,6 +139,27 @@
 		});
 		
 		return balances;
+	}
+
+	function calculateSettlements(balances, membersData) {
+		if (expenseService) {
+			// Convert UI balances format to service format
+			const serviceBalances = {};
+			Object.entries(balances).forEach(([memberId, data]) => {
+				serviceBalances[memberId] = data.balance;
+			});
+			
+			const settlements = expenseService.calculateSettlements(serviceBalances);
+			
+			// Add member names to settlements
+			return settlements.map(settlement => ({
+				...settlement,
+				fromName: membersData[settlement.from]?.name || membersData[settlement.from]?.email || 'Unknown',
+				toName: membersData[settlement.to]?.name || membersData[settlement.to]?.email || 'Unknown'
+			}));
+		}
+		
+		return [];
 	}
 	
 	function handleAddExpense() {
@@ -135,49 +197,65 @@
 	}
 	
 	async function createExpense(expenseData) {
-		// TODO: Implement Firebase expense creation
-		console.log('Creating expense:', expenseData);
+		if (!expenseService || !$user) {
+			throw new Error('Expense service not initialized or user not authenticated');
+		}
 		
-		// Mock implementation for now
-		const expenseId = `expense_${Date.now()}`;
-		expenses[expenseId] = {
-			id: expenseId,
-			...expenseData,
-			createdBy: $user.uid,
-			createdAt: new Date().toISOString(),
-		};
-		expenses = { ...expenses };
+		try {
+			// Get member details for the payer
+			const paidByMember = members[expenseData.paidBy] || {};
+			
+			const newExpense = await expenseService.createExpense({
+				...expenseData,
+				paidBy: paidByMember.name || paidByMember.email || 'Unknown',
+				paidByUserId: expenseData.paidBy,
+				date: new Date().toISOString()
+			}, $user.uid);
+			
+			console.log('Expense created successfully:', newExpense);
+		} catch (error) {
+			console.error('Error creating expense:', error);
+			throw error;
+		}
 	}
 	
 	async function updateExpense(expenseId, expenseData) {
-		// TODO: Implement Firebase expense update
-		console.log('Updating expense:', expenseId, expenseData);
+		if (!expenseService || !$user) {
+			throw new Error('Expense service not initialized or user not authenticated');
+		}
 		
-		// Mock implementation for now
-		if (expenses[expenseId]) {
-			expenses[expenseId] = {
-				...expenses[expenseId],
+		try {
+			// Get member details for the payer
+			const paidByMember = members[expenseData.paidBy] || {};
+			
+			const updatedExpense = await expenseService.updateExpense(expenseId, {
 				...expenseData,
-				updatedAt: new Date().toISOString(),
-			};
-			expenses = { ...expenses };
+				paidBy: paidByMember.name || paidByMember.email || 'Unknown',
+				paidByUserId: expenseData.paidBy
+			}, $user.uid);
+			
+			console.log('Expense updated successfully:', updatedExpense);
+		} catch (error) {
+			console.error('Error updating expense:', error);
+			throw error;
 		}
 	}
 	
 	async function deleteExpense(expenseId) {
 		if (!confirm('Are you sure you want to delete this expense?')) return;
 		
+		if (!expenseService || !$user) {
+			error = 'Expense service not initialized or user not authenticated';
+			return;
+		}
+		
 		try {
 			loading = true;
 			error = null;
 			
-			// TODO: Implement Firebase expense deletion
-			console.log('Deleting expense:', expenseId);
+			await expenseService.deleteExpense(expenseId, $user.uid);
 			
-			// Mock implementation for now
-			delete expenses[expenseId];
-			expenses = { ...expenses };
-			
+			console.log('Expense deleted successfully');
 			dispatch('expensesUpdated');
 		} catch (err) {
 			error = err.message || 'Failed to delete expense';
@@ -271,6 +349,8 @@
 		{categoryTotals}
 		{memberBalances}
 		{categories}
+		{settlements}
+		{members}
 	/>
 	
 	<!-- Expenses List -->

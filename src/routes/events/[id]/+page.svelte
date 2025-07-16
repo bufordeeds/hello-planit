@@ -4,20 +4,29 @@
 	import { goto } from '$app/navigation';
 	import { user, isAuthenticated, loading as authLoading } from '$lib/stores/auth.js';
 	import { eventService, currentEvent, eventsError } from '$lib/stores/events.js';
+	import { itineraryService } from '$lib/services/itineraryService.js';
 	import { formatDate } from '$lib/utils/formatters.js';
 	import EventEditModal from '$lib/components/events/EventEditModal.svelte';
 	import ShareModal from '$lib/components/events/ShareModal.svelte';
+	import MealPlanner from '$lib/components/meals/MealPlanner.svelte';
+	import ExpenseTracker from '$lib/components/expenses/ExpenseTracker.svelte';
+	import ItineraryPlanner from '$lib/components/itinerary/ItineraryPlanner.svelte';
+	import GuestManager from '$lib/components/guests/GuestManager.svelte';
 
 	let eventId = '';
 	let event = null;
 	let loading = true;
 	let error = null;
 	let unsubscribe = null;
+	let itineraryUnsubscribe = null;
 	
 	// Modal states
 	let showEditModal = false;
 	let showShareModal = false;
 	let editLoading = false;
+	
+	// Tab state
+	let activeTab = 'itinerary';
 
 	// Get event ID from URL params
 	$: eventId = $page.params.id;
@@ -45,6 +54,9 @@
 		if (unsubscribe) {
 			unsubscribe();
 		}
+		if (itineraryUnsubscribe) {
+			itineraryUnsubscribe();
+		}
 	});
 
 	async function loadEvent() {
@@ -59,6 +71,13 @@
 				
 				if (!eventData) {
 					error = 'Event not found or you do not have access to it.';
+				}
+			});
+			
+			// Subscribe to itinerary updates
+			itineraryUnsubscribe = itineraryService.subscribeToItinerary(eventId, (itineraryData) => {
+				if (event) {
+					event = { ...event, itinerary: itineraryData };
 				}
 			});
 		} catch (err) {
@@ -94,6 +113,69 @@
 		} finally {
 			loading = false;
 		}
+	}
+
+	function switchTab(tabName) {
+		activeTab = tabName;
+	}
+
+	function getDaysFromEvent(event) {
+		if (!event) return ['day-1', 'day-2'];
+		
+		// Generate days based on event type or use defaults
+		const eventType = event.metadata?.type || 'general';
+		
+		// For weekend events, use Fri/Sat/Sun
+		if (eventType === 'birthday' || eventType === 'weekend' || eventType === 'vacation') {
+			return ['friday', 'saturday', 'sunday'];
+		}
+		
+		// For party events, use party day
+		if (eventType === 'party') {
+			return ['party-day'];
+		}
+		
+		// For wedding events, use wedding day plus additional days
+		if (eventType === 'wedding') {
+			return ['rehearsal-day', 'wedding-day'];
+		}
+		
+		// Default to 2-day event
+		return ['day-1', 'day-2'];
+	}
+
+	function getMealSlotsFromEvent(event) {
+		if (!event) return ['breakfast', 'lunch', 'dinner'];
+		
+		const eventType = event.metadata?.type || 'general';
+		
+		// For business events, focus on business meals
+		if (eventType === 'business') {
+			return ['lunch', 'dinner'];
+		}
+		
+		// For party events, focus on party food
+		if (eventType === 'party') {
+			return ['appetizers', 'main', 'dessert'];
+		}
+		
+		// For wedding events, include special wedding meals
+		if (eventType === 'wedding') {
+			return ['brunch', 'cocktail', 'dinner', 'cake'];
+		}
+		
+		// Default to standard meals
+		return ['breakfast', 'lunch', 'dinner'];
+	}
+
+	function canUserEdit() {
+		if (!event || !$user) return false;
+		
+		const member = event.members?.[$user.uid];
+		if (!member) return false;
+		
+		// Check if user has write permissions
+		return member.permissions?.includes('write') || member.role === 'owner';
 	}
 	
 	async function handleEditSave(eventData) {
@@ -142,6 +224,11 @@
 	function canDelete() {
 		const role = getUserRole();
 		return role === 'owner';
+	}
+
+	function canInvite() {
+		const role = getUserRole();
+		return role === 'owner' || role === 'admin';
 	}
 </script>
 
@@ -220,7 +307,7 @@
 						
 						<div class="meta-item">
 							<i data-lucide="users"></i>
-							<span>{Object.keys(event.members || {}).length} member{Object.keys(event.members || {}).length !== 1 ? 's' : ''}</span>
+							<span>{Object.keys(event.members || {}).length} guest{Object.keys(event.members || {}).length !== 1 ? 's' : ''}</span>
 						</div>
 						
 						<div class="meta-item">
@@ -243,134 +330,88 @@
 		<!-- Event Navigation -->
 		<div class="event-nav">
 			<nav class="nav-tabs">
-				<button class="nav-tab active">
-					<i data-lucide="map"></i>
-					Overview
+				<button 
+					class="nav-tab" 
+					class:active={activeTab === 'itinerary'}
+					on:click={() => switchTab('itinerary')}
+				>
+					<i data-lucide="calendar"></i>
+					Itinerary
 				</button>
-				<button class="nav-tab" disabled>
+				<button 
+					class="nav-tab" 
+					class:active={activeTab === 'meals'}
+					on:click={() => switchTab('meals')}
+				>
 					<i data-lucide="utensils"></i>
 					Meals
 				</button>
-				<button class="nav-tab" disabled>
+				<button 
+					class="nav-tab" 
+					class:active={activeTab === 'expenses'}
+					on:click={() => switchTab('expenses')}
+				>
 					<i data-lucide="dollar-sign"></i>
 					Expenses
 				</button>
-				<button class="nav-tab" disabled>
+				<button 
+					class="nav-tab" 
+					class:active={activeTab === 'guests'}
+					on:click={() => switchTab('guests')}
+				>
 					<i data-lucide="users"></i>
-					Members
+					Guests
 				</button>
 			</nav>
 		</div>
 
 		<!-- Event Content -->
 		<div class="event-content">
-			<!-- Overview Tab Content -->
-			<div class="overview-section">
-				<div class="overview-grid">
-					<!-- Event Details Card -->
-					<div class="info-card">
-						<h3>Event Information</h3>
-						<div class="info-grid">
-							<div class="info-item">
-								<span class="info-label">Created</span>
-								<span class="info-value">{formatDate(event.metadata.createdAt)}</span>
-							</div>
-							<div class="info-item">
-								<span class="info-label">Privacy</span>
-								<span class="info-value">{event.settings.privacy}</span>
-							</div>
-							<div class="info-item">
-								<span class="info-label">Editing</span>
-								<span class="info-value">{event.settings.allowEditing ? 'Allowed' : 'Owner only'}</span>
-							</div>
-							<div class="info-item">
-								<span class="info-label">Approval</span>
-								<span class="info-value">{event.settings.requireApproval ? 'Required' : 'Not required'}</span>
-							</div>
-						</div>
-					</div>
-
-					<!-- Quick Stats Card -->
-					<div class="stats-card">
-						<h3>Quick Stats</h3>
-						<div class="stats-grid">
-							<div class="stat-item">
-								<div class="stat-number">0</div>
-								<div class="stat-label">Meals</div>
-							</div>
-							<div class="stat-item">
-								<div class="stat-number">$0</div>
-								<div class="stat-label">Expenses</div>
-							</div>
-							<div class="stat-item">
-								<div class="stat-number">{Object.keys(event.members || {}).length}</div>
-								<div class="stat-label">Members</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Members Card -->
-					<div class="members-card">
-						<h3>Members</h3>
-						<div class="members-list">
-							{#each Object.entries(event.members || {}) as [memberId, member]}
-								<div class="member-item">
-									<div class="member-avatar">
-										{member.name ? member.name.charAt(0).toUpperCase() : '?'}
-									</div>
-									<div class="member-info">
-										<div class="member-name">{member.name || member.email}</div>
-										<div class="member-role">{member.role}</div>
-									</div>
-								</div>
-							{/each}
-						</div>
-					</div>
-
-					<!-- Features Card -->
-					<div class="features-card">
-						<h3>Available Features</h3>
-						<div class="features-list">
-							<div class="feature-item" class:enabled={event.settings.features?.meals}>
-								<i data-lucide="utensils"></i>
-								<span>Meal Planning</span>
-								{#if event.settings.features?.meals}
-									<i data-lucide="check" class="feature-status enabled"></i>
-								{:else}
-									<i data-lucide="x" class="feature-status disabled"></i>
-								{/if}
-							</div>
-							<div class="feature-item" class:enabled={event.settings.features?.expenses}>
-								<i data-lucide="dollar-sign"></i>
-								<span>Expense Tracking</span>
-								{#if event.settings.features?.expenses}
-									<i data-lucide="check" class="feature-status enabled"></i>
-								{:else}
-									<i data-lucide="x" class="feature-status disabled"></i>
-								{/if}
-							</div>
-							<div class="feature-item" class:enabled={event.settings.features?.itinerary}>
-								<i data-lucide="map"></i>
-								<span>Itinerary</span>
-								{#if event.settings.features?.itinerary}
-									<i data-lucide="check" class="feature-status enabled"></i>
-								{:else}
-									<i data-lucide="x" class="feature-status disabled"></i>
-								{/if}
-							</div>
-							<div class="feature-item" class:enabled={event.settings.features?.chat}>
-								<i data-lucide="message-circle"></i>
-								<span>Chat</span>
-								{#if event.settings.features?.chat}
-									<i data-lucide="check" class="feature-status enabled"></i>
-								{:else}
-									<i data-lucide="x" class="feature-status disabled"></i>
-								{/if}
-							</div>
-						</div>
-					</div>
+			{#if activeTab === 'itinerary'}
+				<!-- Itinerary Tab Content -->
+				<div class="itinerary-section">
+					<ItineraryPlanner 
+						{eventId}
+						eventDays={getDaysFromEvent(event)}
+						canEdit={canUserEdit()}
+						itineraryData={event?.itinerary || {}}
+						on:itineraryUpdated={() => {}}
+					/>
 				</div>
-			</div>
+			{:else if activeTab === 'meals'}
+				<!-- Meals Tab Content -->
+				<div class="meals-section">
+					<MealPlanner 
+						{eventId}
+						eventDays={getDaysFromEvent(event)}
+						mealSlots={getMealSlotsFromEvent(event)}
+						canEdit={canUserEdit()}
+						on:mealsUpdated={() => {}}
+					/>
+				</div>
+			{:else if activeTab === 'expenses'}
+				<!-- Expenses Tab Content -->
+				<div class="expenses-section">
+					<ExpenseTracker 
+						{eventId}
+						members={event?.members || {}}
+						canEdit={canUserEdit()}
+						on:expensesUpdated={() => {}}
+					/>
+				</div>
+			{:else if activeTab === 'guests'}
+				<!-- Guests Tab Content -->
+				<div class="guests-section">
+					<GuestManager 
+						{eventId}
+						members={event?.members || {}}
+						canInvite={canInvite()}
+						on:guestInvited={() => {}}
+						on:invitationCanceled={() => {}}
+						on:guestRemoved={() => {}}
+					/>
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -592,177 +633,20 @@
 		padding: 0 1rem;
 	}
 
-	.overview-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-		gap: 1.5rem;
+	.meals-section {
+		max-width: 100%;
 	}
 
-	.info-card,
-	.stats-card,
-	.members-card,
-	.features-card {
-		background: white;
-		border: 1px solid #e5e7eb;
-		border-radius: 12px;
-		padding: 1.5rem;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	.expenses-section {
+		max-width: 100%;
 	}
 
-	.info-card h3,
-	.stats-card h3,
-	.members-card h3,
-	.features-card h3 {
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: #111827;
-		margin: 0 0 1rem 0;
-		border-bottom: 1px solid #f3f4f6;
-		padding-bottom: 0.5rem;
+	.itinerary-section {
+		max-width: 100%;
 	}
 
-	.info-grid {
-		display: grid;
-		gap: 0.75rem;
-	}
-
-	.info-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.5rem 0;
-	}
-
-	.info-label {
-		font-weight: 500;
-		color: #6b7280;
-	}
-
-	.info-value {
-		color: #111827;
-		text-transform: capitalize;
-	}
-
-	.stats-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 1rem;
-	}
-
-	.stat-item {
-		text-align: center;
-	}
-
-	.stat-number {
-		font-size: 1.5rem;
-		font-weight: 700;
-		color: #3b82f6;
-		margin-bottom: 0.25rem;
-	}
-
-	.stat-label {
-		font-size: 0.75rem;
-		color: #6b7280;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
-	.members-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.member-item {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.5rem;
-		border-radius: 6px;
-		transition: background 0.2s ease;
-	}
-
-	.member-item:hover {
-		background: #f9fafb;
-	}
-
-	.member-avatar {
-		width: 40px;
-		height: 40px;
-		border-radius: 50%;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: 600;
-		font-size: 0.875rem;
-	}
-
-	.member-info {
-		flex: 1;
-	}
-
-	.member-name {
-		font-weight: 500;
-		color: #111827;
-		font-size: 0.875rem;
-	}
-
-	.member-role {
-		font-size: 0.75rem;
-		color: #6b7280;
-		text-transform: capitalize;
-	}
-
-	.features-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.feature-item {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem;
-		border-radius: 6px;
-		border: 1px solid #e5e7eb;
-		transition: all 0.2s ease;
-	}
-
-	.feature-item.enabled {
-		background: #f0f9ff;
-		border-color: #bae6fd;
-	}
-
-	.feature-item i:first-child {
-		width: 20px;
-		height: 20px;
-		color: #6b7280;
-	}
-
-	.feature-item.enabled i:first-child {
-		color: #3b82f6;
-	}
-
-	.feature-item span {
-		flex: 1;
-		font-weight: 500;
-		color: #374151;
-	}
-
-	.feature-status {
-		width: 16px;
-		height: 16px;
-	}
-
-	.feature-status.enabled {
-		color: #059669;
-	}
-
-	.feature-status.disabled {
-		color: #9ca3af;
+	.guests-section {
+		max-width: 100%;
 	}
 
 	.btn {
@@ -863,13 +747,6 @@
 			min-width: fit-content;
 		}
 
-		.overview-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.stats-grid {
-			grid-template-columns: 1fr;
-		}
 
 		.event-content {
 			padding: 0;

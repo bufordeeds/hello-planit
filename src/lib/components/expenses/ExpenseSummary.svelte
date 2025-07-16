@@ -6,6 +6,8 @@
 	export let categoryTotals = {};
 	export let memberBalances = {};
 	export let categories = [];
+	export let settlements = [];
+	export let members = {};
 	
 	let activeTab = 'overview';
 	
@@ -76,6 +78,14 @@
 		>
 			<i data-lucide="users"></i>
 			Balances
+		</button>
+		<button 
+			class="summary-tab" 
+			class:active={activeTab === 'settlements'}
+			on:click={() => activeTab = 'settlements'}
+		>
+			<i data-lucide="arrow-right-left"></i>
+			Settlements
 		</button>
 	</div>
 	
@@ -229,6 +239,62 @@
 					<div class="empty-balances">
 						<i data-lucide="users"></i>
 						<p>No member balances to show</p>
+					</div>
+				{/if}
+			</div>
+		{/if}
+		
+		{#if activeTab === 'settlements'}
+			<div class="settlements-breakdown">
+				<h4>Who Owes Who</h4>
+				{#if settlements && settlements.length > 0}
+					<div class="settlements-list">
+						{#each settlements as settlement}
+							<div class="settlement-item">
+								<div class="settlement-flow">
+									<div class="settlement-from">
+										<div class="member-avatar">
+											{settlement.fromName.charAt(0).toUpperCase()}
+										</div>
+										<span class="member-name">{settlement.fromName}</span>
+									</div>
+									<div class="settlement-arrow">
+										<i data-lucide="arrow-right"></i>
+										<span class="settlement-amount">{formatCurrency(settlement.amount)}</span>
+									</div>
+									<div class="settlement-to">
+										<div class="member-avatar">
+											{settlement.toName.charAt(0).toUpperCase()}
+										</div>
+										<span class="member-name">{settlement.toName}</span>
+									</div>
+								</div>
+								
+								<!-- Venmo payment option if available -->
+								{#if members[settlement.to]?.venmoUsername}
+									<div class="settlement-action">
+										<a 
+											href="https://account.venmo.com/u/{members[settlement.to].venmoUsername}?txn=pay&amount={settlement.amount}&note=Event%20expenses"
+											target="_blank"
+											class="venmo-link"
+										>
+											<i data-lucide="dollar-sign"></i>
+											Pay on Venmo
+										</a>
+									</div>
+								{/if}
+							</div>
+						{/each}
+					</div>
+					
+					<div class="settlements-note">
+						<i data-lucide="info"></i>
+						<p>These are the minimum transactions needed to settle all balances.</p>
+					</div>
+				{:else}
+					<div class="empty-settlements">
+						<i data-lucide="check-circle"></i>
+						<p>All expenses are settled! No transactions needed.</p>
 					</div>
 				{/if}
 			</div>
@@ -581,6 +647,125 @@
 	.empty-balances p {
 		margin: 0;
 	}
+
+	/* Settlements Styles */
+	.settlements-breakdown h4 {
+		margin: 0 0 1rem 0;
+		color: #111827;
+		font-weight: 600;
+	}
+
+	.settlements-list {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.settlement-item {
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 8px;
+		padding: 1rem;
+	}
+
+	.settlement-flow {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.settlement-from,
+	.settlement-to {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex: 1;
+	}
+
+	.settlement-arrow {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		color: #3b82f6;
+		font-weight: 600;
+	}
+
+	.settlement-amount {
+		font-size: 0.875rem;
+		color: #3b82f6;
+		font-weight: 600;
+	}
+
+	.settlement-action {
+		margin-top: 0.75rem;
+		text-align: center;
+	}
+
+	.venmo-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		background: #3b82f6;
+		color: white;
+		padding: 0.5rem 1rem;
+		border-radius: 6px;
+		text-decoration: none;
+		font-size: 0.875rem;
+		font-weight: 500;
+		transition: background-color 0.2s ease;
+	}
+
+	.venmo-link:hover {
+		background: #2563eb;
+	}
+
+	.venmo-link i {
+		width: 14px;
+		height: 14px;
+	}
+
+	.settlements-note {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 1rem;
+		padding: 0.75rem;
+		background: #eff6ff;
+		border: 1px solid #bfdbfe;
+		border-radius: 6px;
+		font-size: 0.875rem;
+		color: #1e40af;
+	}
+
+	.settlements-note i {
+		width: 16px;
+		height: 16px;
+		color: #3b82f6;
+	}
+
+	.settlements-note p {
+		margin: 0;
+	}
+
+	.empty-settlements {
+		text-align: center;
+		padding: 2rem;
+		color: #059669;
+	}
+
+	.empty-settlements i {
+		width: 48px;
+		height: 48px;
+		margin: 0 auto 1rem;
+		color: #059669;
+	}
+
+	.empty-settlements p {
+		margin: 0;
+		font-weight: 500;
+	}
 	
 	/* Mobile responsive */
 	@media (max-width: 768px) {
@@ -615,6 +800,21 @@
 			flex-direction: column;
 			gap: 0.75rem;
 			align-items: center;
+		}
+		
+		.settlement-flow {
+			flex-direction: column;
+			gap: 0.75rem;
+		}
+		
+		.settlement-from,
+		.settlement-to {
+			width: 100%;
+			justify-content: center;
+		}
+		
+		.settlement-arrow {
+			transform: rotate(90deg);
 		}
 	}
 </style>

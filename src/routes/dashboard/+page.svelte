@@ -5,6 +5,7 @@
 	import { events, eventService, eventsLoading } from '$lib/stores/events.js';
 	import { formatDate, formatEventStatus } from '$lib/utils/formatters.js';
 	import EventCreationWizard from '$lib/components/events/EventCreationWizard.svelte';
+	import PendingInvitations from '$lib/components/invitations/PendingInvitations.svelte';
 	
 	let showCreateEventModal = false;
 	let userEventsList = [];
@@ -86,6 +87,9 @@
 	</div>
 
 	<div class="dashboard-content">
+		<!-- Pending Invitations -->
+		<PendingInvitations />
+		
 		{#if $eventsLoading}
 			<div class="loading-state">
 				<div class="loading-spinner"></div>
