@@ -55,7 +55,7 @@ class GuestService {
 			const invitations = snapshot.val() || {};
 			
 			return Object.values(invitations).filter(invitation => 
-				invitation.expiresAt > Date.now() // Only return non-expired invitations
+				invitation.status === 'pending' && invitation.expiresAt > Date.now() // Only return pending, non-expired invitations
 			);
 		} catch (error) {
 			console.error('Error getting invitations:', error);
@@ -212,7 +212,7 @@ class GuestService {
 		const unsubscribe = onValue(invitationsRef, (snapshot) => {
 			const invitations = snapshot.val() || {};
 			const invitationList = Object.values(invitations).filter(invitation => 
-				invitation.expiresAt > Date.now()
+				invitation.status === 'pending' && invitation.expiresAt > Date.now()
 			);
 			callback(invitationList);
 		}, (error) => {
