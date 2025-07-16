@@ -33,41 +33,41 @@
 	
 	const features = [
 		{
-			icon: 'calendar',
-			title: 'Event Planning',
-			description: 'Create and organize events with customizable templates for birthdays, vacations, business meetings, and more.'
+			icon: 'rocket',
+			title: 'Mission Planning',
+			description: 'Launch epic adventures with customizable mission templates for birthdays, expeditions, gatherings, and more.'
 		},
 		{
 			icon: 'users',
-			title: 'Real-time Collaboration',
-			description: 'Invite friends and family to plan together. See changes instantly as everyone contributes to the plan.'
+			title: 'Crew Coordination',
+			description: 'Assemble your crew and plan together. See updates instantly as everyone contributes to the mission.'
 		},
 		{
 			icon: 'utensils',
-			title: 'Meal Planning',
-			description: 'Plan meals for your event, assign who\'s cooking what, and share recipes with the group.'
+			title: 'Fuel Management',
+			description: 'Plan sustenance for your mission, assign crew cooking duties, and share recipes with your team.'
 		},
 		{
-			icon: 'dollar-sign',
-			title: 'Expense Tracking',
-			description: 'Track shared expenses, split costs automatically, and get settlement recommendations with Venmo integration.'
+			icon: 'coins',
+			title: 'Resource Allocation',
+			description: 'Track mission resources, split costs automatically, and get settlement recommendations with integrated payments.'
 		},
 		{
 			icon: 'shield-check',
-			title: 'Secure & Private',
-			description: 'Your events are private by default. Control who can view and edit with role-based permissions.'
+			title: 'Secure Communications',
+			description: 'Your missions are encrypted by default. Control crew access and permissions with military-grade security.'
 		},
 		{
-			icon: 'smartphone',
-			title: 'Mobile Friendly',
-			description: 'Plan on the go with our responsive design that works perfectly on all devices.'
+			icon: 'satellite',
+			title: 'Mobile Command Center',
+			description: 'Command your missions anywhere with our responsive interface that works perfectly on all devices.'
 		}
 	];
 </script>
 
 <svelte:head>
-	<title>Planit - Collaborative Event Planning Made Easy</title>
-	<meta name="description" content="Plan events with friends and family in real-time. Coordinate meals, track expenses, and organize activities together with Planit." />
+	<title>Planit - Mission Control for Your Life's Greatest Adventures</title>
+	<meta name="description" content="Launch epic adventures with your crew. Coordinate missions, track resources, and explore new frontiers together with Planit Mission Control." />
 </svelte:head>
 
 <div class="home">
@@ -80,7 +80,7 @@
 				</div>
 				<div class="message-text">
 					<h3>Sign in required</h3>
-					<p>You need to create an account or sign in to view this event. It's quick and free!</p>
+					<p>You need to join the crew or sign in to access this mission. It's quick and free!</p>
 				</div>
 			</div>
 		</div>
@@ -90,17 +90,17 @@
 	<section class="hero">
 		<div class="hero-content">
 			<h1 class="hero-title">
-				Plan Events Together,<br />
+				Launch Adventures Together,<br />
 				<span class="gradient-text">Effortlessly</span>
 			</h1>
 			<p class="hero-description">
-				Coordinate meals, track expenses, and organize activities with friends and family. 
-				Real-time collaboration makes event planning fun and stress-free.
+				Coordinate missions, track resources, and organize epic adventures with your crew. 
+				Real-time collaboration makes planning your next adventure fun and stress-free.
 			</p>
 			<div class="hero-actions">
 				<button class="btn btn-primary btn-lg" on:click={handleGetStarted}>
-					<i data-lucide="calendar-plus"></i>
-					{$isAuthenticated ? 'Go to Dashboard' : 'Start Planning Free'}
+					<i data-lucide="rocket"></i>
+					{$isAuthenticated ? 'Launch Mission Control' : 'Begin Your Mission'}
 				</button>
 				<button class="btn btn-outline btn-lg" on:click={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}>
 					<i data-lucide="info"></i>
@@ -111,8 +111,8 @@
 		<div class="hero-visual">
 			<div class="hero-card">
 				<div class="card-header">
-					<h3>Bailey's Birthday Beach Weekend</h3>
-					<span class="badge badge-success">Active</span>
+					<h3>Bailey's Cosmic Beach Mission</h3>
+					<span class="badge badge-success">Active Mission</span>
 				</div>
 				<div class="card-content">
 					<div class="event-detail">
@@ -125,13 +125,13 @@
 					</div>
 					<div class="event-detail">
 						<i data-lucide="users"></i>
-						<span>10 people planning</span>
+						<span>10 crew members</span>
 					</div>
 				</div>
 				<div class="card-tabs">
-					<div class="tab active">Meals</div>
-					<div class="tab">Expenses</div>
-					<div class="tab">Itinerary</div>
+					<div class="tab active">Fuel</div>
+					<div class="tab">Resources</div>
+					<div class="tab">Timeline</div>
 				</div>
 			</div>
 		</div>
@@ -140,8 +140,8 @@
 	<!-- Features Section -->
 	<section class="features" id="features">
 		<div class="section-header">
-			<h2>Everything You Need to Plan Together</h2>
-			<p>Powerful features designed to make collaborative event planning simple and enjoyable.</p>
+			<h2>Everything You Need for Epic Adventures</h2>
+			<p>Mission-critical features designed to make collaborative adventure planning simple and enjoyable.</p>
 		</div>
 		
 		<div class="features-grid">
@@ -160,8 +160,8 @@
 	<!-- CTA Section -->
 	<section class="cta">
 		<div class="cta-content">
-			<h2>Ready to Start Planning?</h2>
-			<p>Join thousands of people who make event planning fun with Planit.</p>
+			<h2>Ready to Launch Your First Mission?</h2>
+			<p>Join thousands of adventurers who make mission planning epic with Planit.</p>
 			<button class="btn btn-primary btn-lg" on:click={handleGetStarted}>
 				<i data-lucide="rocket"></i>
 				Get Started Free
@@ -250,7 +250,7 @@
 	}
 
 	.gradient-text {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(135deg, #00D4FF 0%, #FF6B9D 50%, #7209B7 100%);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
@@ -290,25 +290,27 @@
 	}
 
 	.btn-primary {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(135deg, #00D4FF 0%, #7209B7 100%);
 		color: white;
-		box-shadow: 0 4px 14px 0 rgba(102, 126, 234, 0.39);
+		box-shadow: 0 4px 14px 0 rgba(0, 212, 255, 0.39);
+		border: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
 	.btn-primary:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 6px 20px 0 rgba(102, 126, 234, 0.5);
+		box-shadow: 0 6px 20px 0 rgba(0, 212, 255, 0.6);
 	}
 
 	.btn-outline {
-		background: transparent;
-		color: #374151;
-		border: 2px solid #e5e7eb;
+		background: rgba(248, 249, 255, 0.1);
+		color: #E1E5F2;
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		backdrop-filter: blur(10px);
 	}
 
 	.btn-outline:hover {
-		border-color: #d1d5db;
-		background: #f9fafb;
+		border-color: #00D4FF;
+		background: rgba(0, 212, 255, 0.1);
 	}
 
 	/* Hero Visual */
@@ -319,11 +321,12 @@
 	}
 
 	.hero-card {
-		background: white;
+		background: rgba(248, 249, 255, 0.1);
 		border-radius: 16px;
 		padding: 1.5rem;
-		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-		border: 1px solid #e5e7eb;
+		box-shadow: 0 25px 50px -12px rgba(0, 212, 255, 0.25);
+		backdrop-filter: blur(15px);
+		border: 1px solid rgba(255, 255, 255, 0.18);
 		max-width: 350px;
 		width: 100%;
 	}
@@ -334,13 +337,14 @@
 		align-items: center;
 		margin-bottom: 1rem;
 		padding-bottom: 1rem;
-		border-bottom: 1px solid #e5e7eb;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
 	.card-header h3 {
 		font-size: 1.125rem;
 		font-weight: 600;
 		margin: 0;
+		color: #F8F9FF;
 	}
 
 	.card-content {
@@ -352,7 +356,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		margin-bottom: 0.75rem;
-		color: #6b7280;
+		color: #E1E5F2;
 		font-size: 0.875rem;
 	}
 
@@ -371,15 +375,17 @@
 		border-radius: 6px;
 		font-size: 0.875rem;
 		font-weight: 500;
-		background: #f3f4f6;
-		color: #6b7280;
+		background: rgba(45, 27, 105, 0.4);
+		color: #E1E5F2;
 		cursor: pointer;
 		transition: all 0.2s ease;
+		border: 1px solid rgba(255, 255, 255, 0.1);
 	}
 
 	.tab.active {
-		background: #3b82f6;
+		background: linear-gradient(135deg, #00D4FF 0%, #7209B7 100%);
 		color: white;
+		border: 1px solid rgba(255, 255, 255, 0.3);
 	}
 
 	/* Features Section */
@@ -415,26 +421,29 @@
 		text-align: center;
 		padding: 2rem;
 		border-radius: 12px;
-		background: white;
-		border: 1px solid #e5e7eb;
+		background: rgba(248, 249, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.18);
 		transition: all 0.2s ease;
+		backdrop-filter: blur(10px);
 	}
 
 	.feature-card:hover {
-		box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 10px 25px -3px rgba(0, 212, 255, 0.3);
 		transform: translateY(-4px);
+		border-color: rgba(0, 212, 255, 0.5);
 	}
 
 	.feature-icon {
 		width: 64px;
 		height: 64px;
 		margin: 0 auto 1.5rem;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(135deg, #00D4FF 0%, #7209B7 100%);
 		border-radius: 16px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		color: white;
+		box-shadow: 0 8px 32px 0 rgba(0, 212, 255, 0.37);
 	}
 
 	.feature-icon i {
@@ -446,22 +455,25 @@
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin-bottom: 1rem;
+		color: #F8F9FF;
 	}
 
 	.feature-card p {
-		color: #6b7280;
+		color: #E1E5F2;
 		line-height: 1.6;
 		margin: 0;
 	}
 
 	/* CTA Section */
 	.cta {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(135deg, #2D1B69 0%, #553C9A 50%, #7209B7 100%);
 		color: white;
 		text-align: center;
 		padding: 4rem 2rem;
 		border-radius: 16px;
 		margin-bottom: 4rem;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		box-shadow: 0 8px 32px 0 rgba(114, 9, 183, 0.37);
 	}
 
 	.cta-content h2 {
@@ -481,14 +493,16 @@
 	}
 
 	.cta .btn-primary {
-		background: white;
-		color: #667eea;
+		background: rgba(248, 249, 255, 0.95);
+		color: #7209B7;
 		box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+		border: 1px solid rgba(114, 9, 183, 0.3);
 	}
 
 	.cta .btn-primary:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.15);
+		box-shadow: 0 6px 20px 0 rgba(114, 9, 183, 0.4);
+		color: #553C9A;
 	}
 
 	.badge {

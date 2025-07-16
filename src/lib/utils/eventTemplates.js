@@ -1,9 +1,9 @@
 // Event templates with pre-configured settings
 export const EVENT_TEMPLATES = {
 	general: {
-		name: 'General Event',
-		description: 'A flexible template for any type of gathering',
-		icon: '📅',
+		name: 'General Mission',
+		description: 'A flexible template for any type of adventure',
+		icon: '🌌',
 		defaultSettings: {
 			privacy: 'private',
 			allowEditing: true,
@@ -19,14 +19,14 @@ export const EVENT_TEMPLATES = {
 		defaultMealSlots: ['breakfast', 'lunch', 'dinner'],
 		sampleData: {
 			itinerary: {
-				notes: 'Add special notes, dietary restrictions, or important information here.',
+				notes: 'Mission briefing: Add special notes, crew dietary restrictions, or important mission intel here.',
 			},
 		},
 	},
 
 	birthday: {
-		name: 'Birthday Celebration',
-		description: 'Perfect for birthday parties and celebrations',
+		name: 'Cosmic Birthday Mission',
+		description: 'Launch an epic birthday celebration among the stars',
 		icon: '🎂',
 		defaultSettings: {
 			privacy: 'invite-only',
@@ -43,7 +43,7 @@ export const EVENT_TEMPLATES = {
 		defaultMealSlots: ['brunch', 'dinner', 'cake'],
 		sampleData: {
 			itinerary: {
-				notes: 'Birthday celebration! Please let us know about any dietary restrictions or allergies.',
+				notes: 'Cosmic birthday mission! Please transmit any dietary restrictions or allergies to mission control.',
 			},
 			meals: [
 				{
@@ -56,9 +56,9 @@ export const EVENT_TEMPLATES = {
 	},
 
 	vacation: {
-		name: 'Vacation Trip',
-		description: 'Multi-day trip planning with accommodation and activities',
-		icon: '🏖️',
+		name: 'Exploration Expedition',
+		description: 'Multi-day adventure planning with base camps and discoveries',
+		icon: '🌍',
 		defaultSettings: {
 			privacy: 'private',
 			allowEditing: true,
@@ -74,7 +74,7 @@ export const EVENT_TEMPLATES = {
 		defaultMealSlots: ['breakfast', 'lunch', 'dinner'],
 		sampleData: {
 			itinerary: {
-				notes: 'Vacation planning! Don\'t forget to pack sunscreen and comfortable shoes.',
+				notes: 'Exploration expedition briefing! Don\'t forget to pack your adventure gear and comfortable exploration boots.',
 			},
 			expenses: [
 				{
@@ -92,9 +92,9 @@ export const EVENT_TEMPLATES = {
 	},
 
 	business: {
-		name: 'Business Event',
-		description: 'Corporate events, conferences, and team meetings',
-		icon: '💼',
+		name: 'Command Summit',
+		description: 'Strategic gatherings, conferences, and crew briefings',
+		icon: '🛰️',
 		defaultSettings: {
 			privacy: 'invite-only',
 			allowEditing: false,
@@ -110,7 +110,7 @@ export const EVENT_TEMPLATES = {
 		defaultMealSlots: ['breakfast', 'lunch'],
 		sampleData: {
 			itinerary: {
-				notes: 'Professional event. Please arrive 15 minutes early and bring business cards.',
+				notes: 'Command summit briefing. Please arrive 15 minutes early and bring your mission credentials.',
 			},
 			meals: [
 				{
@@ -128,9 +128,9 @@ export const EVENT_TEMPLATES = {
 	},
 
 	wedding: {
-		name: 'Wedding Celebration',
-		description: 'Wedding planning with ceremony and reception',
-		icon: '💒',
+		name: 'Unity Celebration',
+		description: 'Celestial union ceremony with cosmic reception',
+		icon: '💫',
 		defaultSettings: {
 			privacy: 'invite-only',
 			allowEditing: true,
@@ -146,7 +146,7 @@ export const EVENT_TEMPLATES = {
 		defaultMealSlots: ['brunch', 'cocktail', 'dinner'],
 		sampleData: {
 			itinerary: {
-				notes: 'Wedding celebration! Please RSVP with meal preferences and any dietary restrictions.',
+				notes: 'Unity celebration among the stars! Please confirm attendance with meal preferences and dietary restrictions.',
 			},
 			meals: [
 				{
@@ -164,9 +164,9 @@ export const EVENT_TEMPLATES = {
 	},
 
 	party: {
-		name: 'Party/Social Event',
-		description: 'Casual parties and social gatherings',
-		icon: '🎉',
+		name: 'Cosmic Gathering',
+		description: 'Stellar parties and intergalactic social events',
+		icon: '🎆',
 		defaultSettings: {
 			privacy: 'private',
 			allowEditing: true,
@@ -182,7 +182,7 @@ export const EVENT_TEMPLATES = {
 		defaultMealSlots: ['appetizers', 'main', 'dessert'],
 		sampleData: {
 			itinerary: {
-				notes: 'Let\'s party! Bring your dancing shoes and appetite for fun.',
+				notes: 'Cosmic gathering initiated! Bring your dancing boots and appetite for intergalactic fun.',
 			},
 			meals: [
 				{
@@ -195,9 +195,9 @@ export const EVENT_TEMPLATES = {
 	},
 
 	weekend: {
-		name: 'Weekend Getaway',
-		description: 'Short weekend trips and getaways',
-		icon: '🌟',
+		name: 'Orbital Escape',
+		description: 'Short-range missions and quick getaway adventures',
+		icon: '🚀',
 		defaultSettings: {
 			privacy: 'private',
 			allowEditing: true,
@@ -213,7 +213,7 @@ export const EVENT_TEMPLATES = {
 		defaultMealSlots: ['breakfast', 'lunch', 'dinner'],
 		sampleData: {
 			itinerary: {
-				notes: 'Weekend getaway! Pack light and be ready for adventure.',
+				notes: 'Orbital escape mission! Pack light and prepare for stellar adventures.',
 			},
 		},
 	},

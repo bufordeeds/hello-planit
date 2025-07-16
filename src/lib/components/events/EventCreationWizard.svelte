@@ -223,7 +223,7 @@
 			</button>
 			
 			<div class="event-wizard-header">
-				<h2>Create New Event</h2>
+				<h2>🚀 Launch New Mission</h2>
 				<div class="step-indicator">
 					<div class="step-progress">
 						<div class="progress-bar" style="width: {(currentStep / totalSteps) * 100}%"></div>
@@ -240,8 +240,8 @@
 				<!-- Step 1: Template Selection -->
 				{#if currentStep === 1}
 					<div class="wizard-step" data-step="1">
-						<h3>Choose Event Type</h3>
-						<p>Select a template to get started with pre-configured settings</p>
+						<h3>Choose Mission Type</h3>
+						<p>Select a mission template to get started with pre-configured settings</p>
 						
 						<div class="template-grid">
 							{#each getTemplateOptions() as template}
@@ -266,22 +266,22 @@
 				<!-- Step 2: Basic Information -->
 				{#if currentStep === 2}
 					<div class="wizard-step" data-step="2">
-						<h3>Event Details</h3>
-						<p>Tell us about your event</p>
+						<h3>Mission Details</h3>
+						<p>Tell us about your mission</p>
 						
 						<div class="form-group">
-							<label for="eventName">Event Name *</label>
+							<label for="eventName">Mission Name *</label>
 							<input 
 								type="text" 
 								id="eventName" 
 								bind:value={eventData.name}
-								placeholder="Enter event name"
+								placeholder="Enter mission name"
 								required 
 							/>
 						</div>
 						
 						<div class="form-group">
-							<label for="eventDates">Event Dates *</label>
+							<label for="eventDates">Mission Dates *</label>
 							<div class="date-picker-group">
 								<div class="date-input">
 									<label for="startDate">Start Date</label>
@@ -331,59 +331,59 @@
 				<!-- Step 3: Privacy & Settings -->
 				{#if currentStep === 3}
 					<div class="wizard-step" data-step="3">
-						<h3>Privacy & Access</h3>
-						<p>Choose who can see and edit your event</p>
+						<h3>Mission Security & Access</h3>
+						<p>Configure mission security and crew permissions</p>
 						
-						<div class="form-group">
-							<label>Privacy Setting</label>
-							<div class="radio-group">
-								<label class="radio-label">
+						<div class="settings-section">
+							<h4>🔒 Mission Security Level</h4>
+							<div class="settings-grid">
+								<label class="setting-card" class:selected={eventData.privacy === 'private'}>
 									<input type="radio" bind:group={eventData.privacy} value="private" />
-									<span class="radio-custom"></span>
-									<div class="radio-content">
-										<strong>Private</strong>
-										<small>Only people you invite can see this event</small>
+									<div class="setting-icon">🔐</div>
+									<div class="setting-info">
+										<h5>Classified Mission</h5>
+										<p>Only invited crew members can access this mission</p>
 									</div>
 								</label>
 								
-								<label class="radio-label">
+								<label class="setting-card" class:selected={eventData.privacy === 'invite-only'}>
 									<input type="radio" bind:group={eventData.privacy} value="invite-only" />
-									<span class="radio-custom"></span>
-									<div class="radio-content">
-										<strong>Invite Only</strong>
-										<small>People can request to join, but you approve them</small>
+									<div class="setting-icon">🛡️</div>
+									<div class="setting-info">
+										<h5>Restricted Access</h5>
+										<p>Crew can request access, but requires commander approval</p>
 									</div>
 								</label>
 								
-								<label class="radio-label">
+								<label class="setting-card" class:selected={eventData.privacy === 'public'}>
 									<input type="radio" bind:group={eventData.privacy} value="public" />
-									<span class="radio-custom"></span>
-									<div class="radio-content">
-										<strong>Public</strong>
-										<small>Anyone can find and view this event</small>
+									<div class="setting-icon">🌍</div>
+									<div class="setting-info">
+										<h5>Open Mission</h5>
+										<p>Anyone can discover and view this mission</p>
 									</div>
 								</label>
 							</div>
 						</div>
 						
-						<div class="form-group">
-							<label>Editing Permissions</label>
-							<div class="checkbox-group">
-								<label class="checkbox-label">
+						<div class="settings-section">
+							<h4>⚙️ Crew Permissions</h4>
+							<div class="settings-grid">
+								<label class="setting-card checkbox-card" class:selected={eventData.allowEditing}>
 									<input type="checkbox" bind:checked={eventData.allowEditing} />
-									<span class="checkbox-custom"></span>
-									<div class="checkbox-content">
-										<strong>Allow members to edit</strong>
-										<small>Members can add/edit meals, expenses, and itinerary items</small>
+									<div class="setting-icon">✏️</div>
+									<div class="setting-info">
+										<h5>Allow Crew Edits</h5>
+										<p>Crew members can modify mission plans, resources, and timeline</p>
 									</div>
 								</label>
 								
-								<label class="checkbox-label">
+								<label class="setting-card checkbox-card" class:selected={eventData.requireApproval}>
 									<input type="checkbox" bind:checked={eventData.requireApproval} />
-									<span class="checkbox-custom"></span>
-									<div class="checkbox-content">
-										<strong>Require approval for changes</strong>
-										<small>You must approve all edits before they're visible</small>
+									<div class="setting-icon">✅</div>
+									<div class="setting-info">
+										<h5>Commander Approval</h5>
+										<p>All changes require mission commander approval before activation</p>
 									</div>
 								</label>
 							</div>
@@ -394,43 +394,43 @@
 				<!-- Step 4: Review & Create -->
 				{#if currentStep === 4}
 					<div class="wizard-step" data-step="4">
-						<h3>Review & Create</h3>
-						<p>Review your event details before creating</p>
+						<h3>Mission Briefing Review</h3>
+						<p>Review your mission parameters before launch</p>
 						
 						<div class="event-review">
 							<div class="review-section">
-								<h4>Event Information</h4>
+								<h4>🚀 Mission Parameters</h4>
 								<div class="review-item">
-									<span class="review-label">Name:</span>
+									<span class="review-label">Mission Name:</span>
 									<span class="review-value">{eventData.name}</span>
 								</div>
 								<div class="review-item">
-									<span class="review-label">Dates:</span>
+									<span class="review-label">Mission Dates:</span>
 									<span class="review-value">{eventData.dates}</span>
 								</div>
 								<div class="review-item">
-									<span class="review-label">Location:</span>
-									<span class="review-value">{eventData.location || 'Not specified'}</span>
+									<span class="review-label">Mission Location:</span>
+									<span class="review-value">{eventData.location || 'Location TBD'}</span>
 								</div>
 								<div class="review-item">
-									<span class="review-label">Type:</span>
+									<span class="review-label">Mission Type:</span>
 									<span class="review-value">{getTemplateOptions().find(t => t.value === eventData.template)?.label}</span>
 								</div>
 							</div>
 							
 							<div class="review-section">
-								<h4>Privacy & Settings</h4>
+								<h4>🔒 Security & Permissions</h4>
 								<div class="review-item">
-									<span class="review-label">Privacy:</span>
+									<span class="review-label">Security Level:</span>
 									<span class="review-value">{eventData.privacy.charAt(0).toUpperCase() + eventData.privacy.slice(1)}</span>
 								</div>
 								<div class="review-item">
-									<span class="review-label">Editing:</span>
-									<span class="review-value">{eventData.allowEditing ? 'Members can edit' : 'Owner only'}</span>
+									<span class="review-label">Crew Editing:</span>
+									<span class="review-value">{eventData.allowEditing ? 'Crew can modify plans' : 'Commander only'}</span>
 								</div>
 								<div class="review-item">
-									<span class="review-label">Approval:</span>
-									<span class="review-value">{eventData.requireApproval ? 'Required' : 'Not required'}</span>
+									<span class="review-label">Change Approval:</span>
+									<span class="review-value">{eventData.requireApproval ? 'Commander approval required' : 'Direct changes allowed'}</span>
 								</div>
 							</div>
 						</div>
@@ -480,8 +480,8 @@
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background: rgba(0, 0, 0, 0.5);
-		backdrop-filter: blur(4px);
+		background: rgba(11, 20, 38, 0.9);
+		backdrop-filter: blur(8px);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -490,13 +490,15 @@
 
 	.event-wizard-content {
 		position: relative;
-		background: white;
+		background: rgba(248, 249, 255, 0.1);
+		backdrop-filter: blur(15px);
+		border: 1px solid rgba(255, 255, 255, 0.18);
 		border-radius: 12px;
 		width: 90%;
 		max-width: 600px;
 		max-height: 90vh;
 		overflow: hidden;
-		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		box-shadow: 0 8px 32px 0 rgba(0, 212, 255, 0.37);
 		display: flex;
 		flex-direction: column;
 	}
@@ -505,29 +507,31 @@
 		position: absolute;
 		top: 1rem;
 		right: 1rem;
-		background: none;
-		border: none;
+		background: rgba(248, 249, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.2);
 		cursor: pointer;
 		padding: 0.5rem;
 		border-radius: 6px;
-		color: #6b7280;
+		color: #E1E5F2;
 		transition: all 0.2s ease;
 		z-index: 10;
+		backdrop-filter: blur(10px);
 	}
 
 	.event-wizard-close:hover {
-		background: #f3f4f6;
-		color: #374151;
+		background: rgba(0, 212, 255, 0.2);
+		color: #00D4FF;
+		border-color: rgba(0, 212, 255, 0.5);
 	}
 
 	.event-wizard-header {
 		padding: 2rem 2rem 1rem;
-		border-bottom: 1px solid #e5e7eb;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
 	.event-wizard-header h2 {
 		margin: 0 0 1rem 0;
-		color: #111827;
+		color: #F8F9FF;
 		font-size: 1.5rem;
 		font-weight: 600;
 	}
@@ -541,21 +545,23 @@
 	.step-progress {
 		flex: 1;
 		height: 4px;
-		background: #e5e7eb;
+		background: rgba(255, 255, 255, 0.2);
 		border-radius: 2px;
 		overflow: hidden;
 	}
 
 	.progress-bar {
 		height: 100%;
-		background: #3b82f6;
+		background: linear-gradient(90deg, #00D4FF 0%, #7209B7 100%);
 		transition: width 0.3s ease;
+		box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
 	}
 
 	.step-text {
 		font-size: 0.875rem;
-		color: #6b7280;
+		color: #E1E5F2;
 		white-space: nowrap;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 	}
 
 	.event-wizard-body {
@@ -566,14 +572,14 @@
 
 	.wizard-step h3 {
 		margin: 0 0 0.5rem 0;
-		color: #111827;
+		color: #F8F9FF;
 		font-size: 1.25rem;
 		font-weight: 600;
 	}
 
 	.wizard-step p {
 		margin: 0 0 2rem 0;
-		color: #6b7280;
+		color: #E1E5F2;
 		font-size: 0.875rem;
 	}
 
@@ -595,7 +601,7 @@
 	}
 
 	.template-card {
-		border: 2px solid #e5e7eb;
+		border: 2px solid rgba(255, 255, 255, 0.2);
 		border-radius: 8px;
 		padding: 1.5rem;
 		cursor: pointer;
@@ -603,16 +609,20 @@
 		display: flex;
 		align-items: flex-start;
 		gap: 1rem;
+		background: rgba(248, 249, 255, 0.05);
+		backdrop-filter: blur(10px);
 	}
 
 	.template-card:hover {
-		border-color: #d1d5db;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		border-color: rgba(0, 212, 255, 0.4);
+		box-shadow: 0 8px 25px -3px rgba(0, 212, 255, 0.2);
+		background: rgba(248, 249, 255, 0.1);
 	}
 
 	.template-card.selected {
-		border-color: #3b82f6;
-		background: #eff6ff;
+		border-color: #00D4FF;
+		background: rgba(0, 212, 255, 0.15);
+		box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
 	}
 
 	.template-card input[type="radio"] {
@@ -626,16 +636,98 @@
 
 	.template-info h4 {
 		margin: 0 0 0.5rem 0;
-		color: #111827;
+		color: #F8F9FF;
 		font-size: 1rem;
 		font-weight: 600;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 	}
 
 	.template-info p {
 		margin: 0;
-		color: #6b7280;
+		color: #E1E5F2;
 		font-size: 0.875rem;
 		line-height: 1.4;
+		opacity: 0.9;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	}
+
+	/* Settings Step Styling */
+	.settings-section {
+		margin-bottom: 2.5rem;
+	}
+
+	.settings-section h4 {
+		color: #F8F9FF;
+		font-size: 1.125rem;
+		font-weight: 600;
+		margin-bottom: 1rem;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	}
+
+	.settings-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+		gap: 1rem;
+	}
+
+	/* Single column for checkbox cards on smaller screens */
+	@media (max-width: 768px) {
+		.settings-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.setting-card {
+		border: 2px solid rgba(255, 255, 255, 0.2);
+		border-radius: 8px;
+		padding: 1.5rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: flex-start;
+		gap: 1rem;
+		background: rgba(248, 249, 255, 0.05);
+		backdrop-filter: blur(10px);
+	}
+
+	.setting-card:hover {
+		border-color: rgba(0, 212, 255, 0.4);
+		box-shadow: 0 8px 25px -3px rgba(0, 212, 255, 0.2);
+		background: rgba(248, 249, 255, 0.1);
+	}
+
+	.setting-card.selected {
+		border-color: #00D4FF;
+		background: rgba(0, 212, 255, 0.15);
+		box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+	}
+
+	.setting-card input[type="radio"],
+	.setting-card input[type="checkbox"] {
+		display: none;
+	}
+
+	.setting-icon {
+		font-size: 1.5rem;
+		line-height: 1;
+		flex-shrink: 0;
+	}
+
+	.setting-info h5 {
+		margin: 0 0 0.5rem 0;
+		color: #F8F9FF;
+		font-size: 1rem;
+		font-weight: 600;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	}
+
+	.setting-info p {
+		margin: 0;
+		color: #E1E5F2;
+		font-size: 0.875rem;
+		line-height: 1.4;
+		opacity: 0.9;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 	}
 
 	/* Form styles */
@@ -649,28 +741,40 @@
 	.form-group label {
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: #374151;
+		color: #E1E5F2;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 	}
 
 	.form-group input,
 	.form-group textarea {
 		padding: 0.75rem;
-		border: 1px solid #d1d5db;
+		border: 1px solid rgba(255, 255, 255, 0.3);
 		border-radius: 6px;
 		font-size: 0.875rem;
 		transition: border-color 0.2s ease;
+		background: rgba(248, 249, 255, 0.1);
+		color: #F8F9FF;
+		backdrop-filter: blur(10px);
+	}
+
+	.form-group input::placeholder,
+	.form-group textarea::placeholder {
+		color: rgba(225, 229, 242, 0.6);
+		opacity: 1;
 	}
 
 	.form-group input:focus,
 	.form-group textarea:focus {
 		outline: none;
-		border-color: #3b82f6;
-		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+		border-color: #00D4FF;
+		box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.3);
+		background: rgba(248, 249, 255, 0.15);
 	}
 
 	.form-group small {
 		font-size: 0.75rem;
-		color: #6b7280;
+		color: #E1E5F2;
+		opacity: 0.8;
 	}
 	
 	.date-picker-group {
@@ -802,13 +906,23 @@
 		gap: 2rem;
 	}
 
+	.review-section {
+		background: rgba(248, 249, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 8px;
+		padding: 1.5rem;
+		margin-bottom: 1.5rem;
+		backdrop-filter: blur(10px);
+	}
+
 	.review-section h4 {
 		margin: 0 0 1rem 0;
-		color: #111827;
+		color: #F8F9FF;
 		font-size: 1.125rem;
 		font-weight: 600;
-		border-bottom: 1px solid #e5e7eb;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 		padding-bottom: 0.5rem;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 	}
 
 	.review-item {
@@ -817,7 +931,7 @@
 		align-items: flex-start;
 		gap: 1rem;
 		padding: 0.75rem 0;
-		border-bottom: 1px solid #f3f4f6;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	}
 
 	.review-item:last-child {
@@ -826,14 +940,17 @@
 
 	.review-label {
 		font-weight: 500;
-		color: #6b7280;
-		min-width: 100px;
+		color: #E1E5F2;
+		min-width: 120px;
+		opacity: 0.8;
 	}
 
 	.review-value {
-		color: #111827;
+		color: #F8F9FF;
 		text-align: right;
 		flex: 1;
+		font-weight: 500;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 	}
 
 	/* Wizard Footer */
@@ -872,14 +989,16 @@
 	}
 
 	.btn-outline {
-		background: transparent;
-		color: #374151;
-		border: 1px solid #d1d5db;
+		background: rgba(248, 249, 255, 0.1);
+		color: #E1E5F2;
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		backdrop-filter: blur(10px);
 	}
 
 	.btn-outline:hover:not(:disabled) {
-		background: #f9fafb;
-		border-color: #9ca3af;
+		background: rgba(248, 249, 255, 0.2);
+		border-color: rgba(0, 212, 255, 0.5);
+		color: #00D4FF;
 	}
 
 	/* Mobile responsive */

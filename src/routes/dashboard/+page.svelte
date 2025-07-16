@@ -68,8 +68,8 @@
 </script>
 
 <svelte:head>
-	<title>Dashboard - Planit</title>
-	<meta name="description" content="Manage your events and collaborate with friends and family." />
+	<title>Mission Control - Planit</title>
+	<meta name="description" content="Command center for your adventures. Manage missions and coordinate with your crew." />
 </svelte:head>
 
 <div class="dashboard">
@@ -77,11 +77,11 @@
 		<div class="header-content">
 			<div class="header-text">
 				<h1>Welcome back{$user?.displayName ? `, ${$user.displayName}` : ''}!</h1>
-				<p>Manage your events and start planning your next gathering.</p>
+				<p>Command your missions and start planning your next adventure.</p>
 			</div>
 			<button class="btn btn-primary" on:click={handleCreateEvent}>
-				<i data-lucide="plus"></i>
-				Create Event
+				<i data-lucide="rocket"></i>
+				Launch Mission
 			</button>
 		</div>
 	</div>
@@ -93,25 +93,25 @@
 		{#if $eventsLoading}
 			<div class="loading-state">
 				<div class="loading-spinner"></div>
-				<p>Loading your events...</p>
+				<p>Loading your missions...</p>
 			</div>
 		{:else if userEventsList.length === 0}
 			<div class="empty-state">
 				<div class="empty-icon">
 					<i data-lucide="calendar-plus"></i>
 				</div>
-				<h2>No events yet</h2>
-				<p>Create your first event to start planning with friends and family.</p>
+				<h2>No missions yet</h2>
+				<p>Launch your first mission to start planning adventures with your crew.</p>
 				<button class="btn btn-primary btn-lg" on:click={handleCreateEvent}>
-					<i data-lucide="calendar-plus"></i>
-					Create Your First Event
+					<i data-lucide="rocket"></i>
+					Launch Your First Mission
 				</button>
 			</div>
 		{:else}
 			<div class="events-section">
 				<div class="section-header">
-					<h2>Your Events</h2>
-					<p>{userEventsList.length} event{userEventsList.length !== 1 ? 's' : ''}</p>
+					<h2>Your Missions</h2>
+					<p>{userEventsList.length} mission{userEventsList.length !== 1 ? 's' : ''}</p>
 				</div>
 				
 				<div class="events-grid">
@@ -146,7 +146,7 @@
 								
 								<div class="event-detail">
 									<i data-lucide="user"></i>
-									<span>You are the {event.userRole}</span>
+									<span>You are the {event.userRole === 'owner' ? 'mission commander' : event.userRole}</span>
 								</div>
 							</div>
 							
@@ -201,11 +201,14 @@
 	}
 
 	.dashboard-header {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(135deg, #2D1B69 0%, #553C9A 50%, #7209B7 100%);
 		color: white;
 		padding: 3rem 2rem;
 		border-radius: 16px;
 		margin-bottom: 2rem;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		box-shadow: 0 8px 32px 0 rgba(114, 9, 183, 0.37);
+		backdrop-filter: blur(10px);
 	}
 
 	.header-content {
@@ -244,16 +247,43 @@
 	.loading-spinner {
 		width: 40px;
 		height: 40px;
-		border: 4px solid #e5e7eb;
-		border-top: 4px solid #3b82f6;
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
+		position: relative;
+		display: inline-block;
 		margin-bottom: 1rem;
 	}
 
-	@keyframes spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+	.loading-spinner::before {
+		content: '🚀';
+		font-size: 24px;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		animation: rocket-bounce 1.5s ease-in-out infinite;
+	}
+
+	.loading-spinner::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 60px;
+		height: 60px;
+		border: 2px solid transparent;
+		border-top: 2px solid #00D4FF;
+		border-radius: 50%;
+		transform: translate(-50%, -50%);
+		animation: rocket-orbit 2s linear infinite;
+	}
+
+	@keyframes rocket-bounce {
+		0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
+		50% { transform: translate(-50%, -50%) translateY(-10px); }
+	}
+
+	@keyframes rocket-orbit {
+		0% { transform: translate(-50%, -50%) rotate(0deg); }
+		100% { transform: translate(-50%, -50%) rotate(360deg); }
 	}
 
 	.empty-state {
@@ -268,13 +298,14 @@
 	.empty-icon {
 		width: 80px;
 		height: 80px;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(135deg, #00D4FF 0%, #7209B7 100%);
 		border-radius: 20px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin-bottom: 2rem;
 		color: white;
+		box-shadow: 0 8px 32px 0 rgba(0, 212, 255, 0.37);
 	}
 
 	.empty-icon i {
@@ -286,11 +317,11 @@
 		font-size: 1.5rem;
 		font-weight: 600;
 		margin-bottom: 0.5rem;
-		color: #111827;
+		color: #F8F9FF;
 	}
 
 	.empty-state p {
-		color: #6b7280;
+		color: #E1E5F2;
 		font-size: 1.125rem;
 		margin-bottom: 2rem;
 	}
@@ -309,12 +340,12 @@
 	.section-header h2 {
 		font-size: 1.5rem;
 		font-weight: 600;
-		color: #111827;
+		color: #F8F9FF;
 		margin: 0;
 	}
 
 	.section-header p {
-		color: #6b7280;
+		color: #E1E5F2;
 		margin: 0;
 	}
 
@@ -325,19 +356,58 @@
 	}
 
 	.event-card {
-		background: white;
-		border: 1px solid #e5e7eb;
+		background: rgba(248, 249, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.18);
 		border-radius: 12px;
 		padding: 1.5rem;
 		cursor: pointer;
 		transition: all 0.2s ease;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+		backdrop-filter: blur(10px);
+		position: relative;
+		overflow: hidden;
+	}
+
+	/* Orbital ring effect */
+	.event-card::before {
+		content: '';
+		position: absolute;
+		top: -2px;
+		left: -2px;
+		right: -2px;
+		bottom: -2px;
+		background: conic-gradient(
+			from 0deg,
+			transparent 0deg,
+			rgba(0, 212, 255, 0.3) 45deg,
+			transparent 90deg,
+			rgba(255, 107, 157, 0.3) 135deg,
+			transparent 180deg,
+			rgba(0, 212, 255, 0.3) 225deg,
+			transparent 270deg,
+			rgba(255, 107, 157, 0.3) 315deg,
+			transparent 360deg
+		);
+		border-radius: 14px;
+		animation: orbital-rotation 20s linear infinite;
+		opacity: 0;
+		transition: opacity 0.3s ease;
+		z-index: -1;
+	}
+
+	.event-card:hover::before {
+		opacity: 1;
+	}
+
+	@keyframes orbital-rotation {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
 	}
 
 	.event-card:hover {
-		box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 10px 25px -3px rgba(0, 212, 255, 0.3);
 		transform: translateY(-2px);
-		border-color: #d1d5db;
+		border-color: rgba(0, 212, 255, 0.5);
 	}
 
 	.event-card-header {
@@ -351,7 +421,7 @@
 	.event-title {
 		font-size: 1.25rem;
 		font-weight: 600;
-		color: #111827;
+		color: #F8F9FF;
 		margin: 0;
 		line-height: 1.3;
 	}
@@ -365,18 +435,18 @@
 		align-items: center;
 		gap: 0.5rem;
 		margin-bottom: 0.5rem;
-		color: #6b7280;
+		color: #E1E5F2;
 		font-size: 0.875rem;
 	}
 
 	.event-detail i {
 		width: 16px;
 		height: 16px;
-		color: #9ca3af;
+		color: #00D4FF;
 	}
 
 	.event-description {
-		color: #6b7280;
+		color: #E1E5F2;
 		font-size: 0.875rem;
 		line-height: 1.5;
 		margin: 0 0 1rem 0;
@@ -392,7 +462,7 @@
 		align-items: center;
 		gap: 1rem;
 		padding-top: 1rem;
-		border-top: 1px solid #f3f4f6;
+		border-top: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
 	.event-meta {
@@ -404,13 +474,14 @@
 	.event-type {
 		font-size: 0.75rem;
 		font-weight: 500;
-		color: #3b82f6;
+		color: #00D4FF;
 		text-transform: capitalize;
 	}
 
 	.event-created {
 		font-size: 0.75rem;
-		color: #9ca3af;
+		color: #E1E5F2;
+		opacity: 0.7;
 	}
 
 	.event-actions {
@@ -419,21 +490,23 @@
 	}
 
 	.btn-icon {
-		background: none;
-		border: none;
+		background: rgba(248, 249, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.2);
 		padding: 0.5rem;
 		border-radius: 6px;
-		color: #6b7280;
+		color: #E1E5F2;
 		cursor: pointer;
 		transition: all 0.2s ease;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		backdrop-filter: blur(10px);
 	}
 
 	.btn-icon:hover {
-		background: #f3f4f6;
-		color: #374151;
+		background: rgba(0, 212, 255, 0.2);
+		color: #00D4FF;
+		border-color: rgba(0, 212, 255, 0.5);
 	}
 
 	.btn-icon i {
@@ -462,14 +535,15 @@
 	}
 
 	.btn-primary {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(135deg, #00D4FF 0%, #7209B7 100%);
 		color: white;
-		box-shadow: 0 4px 14px 0 rgba(102, 126, 234, 0.39);
+		box-shadow: 0 4px 14px 0 rgba(0, 212, 255, 0.39);
+		border: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
 	.btn-primary:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 6px 20px 0 rgba(102, 126, 234, 0.5);
+		box-shadow: 0 6px 20px 0 rgba(0, 212, 255, 0.6);
 	}
 
 	.badge {
@@ -484,23 +558,27 @@
 	}
 
 	.badge-primary {
-		background-color: #dbeafe;
-		color: #1e40af;
+		background-color: rgba(0, 212, 255, 0.2);
+		color: #00D4FF;
+		border: 1px solid rgba(0, 212, 255, 0.3);
 	}
 
 	.badge-success {
-		background-color: #d1fae5;
-		color: #065f46;
+		background-color: rgba(57, 255, 20, 0.2);
+		color: #39FF14;
+		border: 1px solid rgba(57, 255, 20, 0.3);
 	}
 
 	.badge-warning {
-		background-color: #fef3c7;
-		color: #92400e;
+		background-color: rgba(255, 206, 84, 0.2);
+		color: #FFCE54;
+		border: 1px solid rgba(255, 206, 84, 0.3);
 	}
 
 	.badge-secondary {
-		background-color: #f3f4f6;
-		color: #4b5563;
+		background-color: rgba(225, 229, 242, 0.2);
+		color: #E1E5F2;
+		border: 1px solid rgba(225, 229, 242, 0.3);
 	}
 
 	/* Mobile responsive */

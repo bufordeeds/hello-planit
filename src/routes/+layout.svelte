@@ -51,8 +51,8 @@
 		<div class="header-content">
 			<div class="brand">
 				<a href="/" class="brand-link">
-					<h1>Planit</h1>
-					<span class="brand-tagline">Collaborative Event Planning</span>
+					<h1>🚀 Planit</h1>
+					<span class="brand-tagline">Mission Control for Life's Adventures</span>
 				</a>
 			</div>
 
@@ -65,10 +65,10 @@
 				{:else}
 					<div class="auth-buttons">
 						<button class="btn btn-outline" on:click={handleShowLogin}>
-							Sign In
+							Join Crew
 						</button>
 						<button class="btn btn-primary" on:click={handleShowLogin}>
-							Get Started
+							Launch Mission
 						</button>
 					</div>
 				{/if}
@@ -84,7 +84,7 @@
 	<!-- Footer -->
 	<footer class="footer">
 		<div class="footer-content">
-			<p>&copy; 2025 Planit. Built for seamless event collaboration.</p>
+			<p>&copy; 2025 Planit. Mission Control for Life's Greatest Adventures.</p>
 			<div class="footer-links">
 				<a href="/privacy">Privacy</a>
 				<a href="/terms">Terms</a>
@@ -113,32 +113,62 @@
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background: rgba(255, 255, 255, 0.8);
+		background: rgba(11, 20, 38, 0.9);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		z-index: 9999;
+		backdrop-filter: blur(5px);
 	}
 
 	.loading-spinner {
 		width: 40px;
 		height: 40px;
-		border: 4px solid #e5e7eb;
-		border-top: 4px solid #3b82f6;
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
+		position: relative;
+		display: inline-block;
 	}
 
-	@keyframes spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+	.loading-spinner::before {
+		content: '🚀';
+		font-size: 24px;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		animation: rocket-bounce 1.5s ease-in-out infinite;
+	}
+
+	.loading-spinner::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 60px;
+		height: 60px;
+		border: 2px solid transparent;
+		border-top: 2px solid #00D4FF;
+		border-radius: 50%;
+		transform: translate(-50%, -50%);
+		animation: rocket-orbit 2s linear infinite;
+	}
+
+	@keyframes rocket-bounce {
+		0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
+		50% { transform: translate(-50%, -50%) translateY(-10px); }
+	}
+
+	@keyframes rocket-orbit {
+		0% { transform: translate(-50%, -50%) rotate(0deg); }
+		100% { transform: translate(-50%, -50%) rotate(360deg); }
 	}
 
 	.header {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(135deg, #0B1426 0%, #2D1B69 50%, #553C9A 100%);
 		color: white;
 		padding: 1rem 0;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 4px 6px -1px rgba(0, 212, 255, 0.2);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(10px);
 	}
 
 	.header-content {
@@ -192,12 +222,14 @@
 	}
 
 	.btn-primary {
-		background: #3b82f6;
+		background: linear-gradient(135deg, #00D4FF 0%, #7209B7 100%);
 		color: white;
+		border: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
 	.btn-primary:hover {
-		background: #2563eb;
+		box-shadow: 0 4px 14px 0 rgba(0, 212, 255, 0.5);
+		transform: translateY(-1px);
 	}
 
 	.btn-outline {
@@ -219,10 +251,11 @@
 	}
 
 	.footer {
-		background: #f9fafb;
-		border-top: 1px solid #e5e7eb;
+		background: rgba(11, 20, 38, 0.9);
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
 		padding: 2rem 0;
 		margin-top: auto;
+		backdrop-filter: blur(10px);
 	}
 
 	.footer-content {
@@ -238,7 +271,7 @@
 
 	.footer-content p {
 		margin: 0;
-		color: #6b7280;
+		color: #E1E5F2;
 		font-size: 0.875rem;
 	}
 
@@ -248,14 +281,14 @@
 	}
 
 	.footer-links a {
-		color: #6b7280;
+		color: #E1E5F2;
 		text-decoration: none;
 		font-size: 0.875rem;
 		transition: color 0.2s ease;
 	}
 
 	.footer-links a:hover {
-		color: #374151;
+		color: #00D4FF;
 	}
 
 	/* Mobile responsive */
