@@ -107,6 +107,12 @@ class GuestService {
 
 			await set(ref(this.database, `events/${eventId}/members/${user.uid}`), memberData);
 
+			// Add event to user's events list
+			await set(ref(this.database, `users/${user.uid}/events/${eventId}`), {
+				role: invitation.role,
+				joinedAt: Date.now()
+			});
+
 			// Update invitation status
 			await set(ref(this.database, `invitations/${eventId}/${invitationId}/status`), 'accepted');
 			await set(ref(this.database, `invitations/${eventId}/${invitationId}/acceptedAt`), Date.now());
